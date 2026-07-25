@@ -138,7 +138,7 @@ function SectionHeading({
 }) {
   return (
     <div id={id} className="scroll-mt-20">
-      <div className="flex items-center gap-3 pb-3">
+      <div className="flex flex-wrap items-center gap-3 pb-3">
         <span className="flex size-6 items-center justify-center rounded-md bg-muted text-xs font-bold text-muted-foreground">
           {number}
         </span>

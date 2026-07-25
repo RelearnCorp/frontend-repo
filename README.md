@@ -123,6 +123,10 @@ Left as-is intentionally rather than half-built; flagging for follow-up:
   than the active one, Notifications, Sync Analytics, Generate Weekly
   Report, View All, Manage Files, Forgot password, DM.
 - No `/courses/{id}` (or `/courses` list) page exists yet.
+- The "Contact Us" button in the marketing navbar has no destination yet
+  (no `href`/`onClick`) — a decorative CTA until there's a real contact
+  mechanism to wire it to. The "About Us" nav link (`#about`) is also a
+  dead anchor — no matching section exists on the homepage yet.
 - This project's `Button` is [Base UI](https://base-ui.com), **not
   Radix** — use the `render` prop to compose it with `<Link>`, not
   `asChild` (which doesn't exist here and fails silently).
