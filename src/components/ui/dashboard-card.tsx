@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 interface DashboardCardProps
   extends Omit<React.ComponentProps<typeof Card>, "title"> {
   title: React.ReactNode;
+  /** Override the title's heading level (defaults to h2) when a card is nested under its own section heading. */
+  titleRender?: React.ReactElement;
   action?: React.ReactNode;
   description?: React.ReactNode;
   children: React.ReactNode;
@@ -18,6 +20,7 @@ interface DashboardCardProps
 
 export function DashboardCard({
   title,
+  titleRender,
   action,
   description,
   children,
@@ -27,7 +30,11 @@ export function DashboardCard({
   return (
     <Card className={cn("rounded-2xl px-2 py-6", className)} {...props}>
       <CardHeader className="px-6">
-        <CardTitle className="font-bold">{title}</CardTitle>
+        {title && (
+          <CardTitle className="font-bold" render={titleRender}>
+            {title}
+          </CardTitle>
+        )}
         {description && <CardDescription>{description}</CardDescription>}
         {action && <CardAction>{action}</CardAction>}
       </CardHeader>

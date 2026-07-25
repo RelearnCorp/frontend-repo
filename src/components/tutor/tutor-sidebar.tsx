@@ -87,7 +87,7 @@ export function TutorSidebar() {
               className="gap-0.5 transition-colors hover:bg-sidebar-accent/40"
             >
               <CardHeader>
-                <CardTitle className="text-sm font-semibold">
+                <CardTitle className="text-sm font-semibold" render={<h3 />}>
                   {card.title}
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed">

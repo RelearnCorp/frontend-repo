@@ -14,6 +14,7 @@ export function TutorHeader() {
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6">
+      <h1 className="sr-only">AI Tutor</h1>
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"

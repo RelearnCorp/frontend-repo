@@ -88,7 +88,7 @@ export function AuthForm() {
   return (
     <Card className="w-full max-w-sm rounded-2xl">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">
+        <CardTitle className="text-xl font-bold" render={<h1 />}>
           {isLogin ? "Welcome back" : "Create your account"}
         </CardTitle>
         <CardDescription>

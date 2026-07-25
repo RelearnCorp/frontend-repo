@@ -171,7 +171,7 @@ export default function FeaturesPage() {
 
         <main className="mx-auto max-w-6xl w-full space-y-14 p-6 lg:p-10">
           <div>
-            <H1>Platform Capabilities</H1>
+            <H1 render={<h2 />}>Platform Capabilities</H1>
             <Muted className="max-w-xl pt-3 text-base">
               Detailed breakdown of Relearn&apos;s core architectural epics,
               integrating traditional LMS foundations with advanced AI cognitive
@@ -187,7 +187,7 @@ export default function FeaturesPage() {
             />
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {CORE_LMS_FEATURES.map((feature) => (
-                <DashboardCard key={feature.title} title={<span className="text-sm">{feature.title}</span>} className="gap-4 p-5">
+                <DashboardCard key={feature.title} title={<span className="text-sm">{feature.title}</span>} titleRender={<h3 />} className="gap-4 p-5">
                   <div className="mb-4">
                     <span
                       className={cn(
@@ -283,7 +283,7 @@ export default function FeaturesPage() {
 
               <aside className="space-y-6 border-t bg-muted/40 p-6 lg:border-t-0 lg:border-l">
                 <div>
-                  <Eyebrow render={<h4 />} className="pb-4">
+                  <Eyebrow render={<h3 />} className="pb-4">
                     Model Parameters
                   </Eyebrow>
                   <div className="space-y-4">
@@ -302,7 +302,7 @@ export default function FeaturesPage() {
                   </div>
                 </div>
                 <div>
-                  <Eyebrow render={<h4 />} className="pb-2">
+                  <Eyebrow render={<h3 />} className="pb-2">
                     Teacher Materials (RAG)
                   </Eyebrow>
                   <Muted className="text-xs leading-relaxed">
@@ -329,6 +329,7 @@ export default function FeaturesPage() {
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
               <DashboardCard
                 title="Learning Twin Trajectory"
+                titleRender={<h3 />}
                 description="Class aggregate vs. AI predicted mastery"
                 action={
                   <Badge variant="secondary" className="h-auto rounded-lg px-3 py-1.5 font-semibold">
@@ -349,7 +350,7 @@ export default function FeaturesPage() {
                 </div>
               </DashboardCard>
 
-              <DashboardCard title="Intervention Alerts">
+              <DashboardCard title="Intervention Alerts" titleRender={<h3 />}>
                 <div className="space-y-3">
                   <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900 dark:bg-rose-950/40">
                     <p className="flex items-center gap-2 text-sm font-bold text-rose-700 dark:text-rose-300">
@@ -384,7 +385,7 @@ export default function FeaturesPage() {
             />
             <div className="grid gap-5 lg:grid-cols-2">
               {BUDDY_TOOLS.map((tool) => (
-                <DashboardCard key={tool.title} title={<span className="text-sm">{tool.title}</span>} className="flex-row gap-4 p-6">
+                <DashboardCard key={tool.title} title={<span className="text-sm">{tool.title}</span>} titleRender={<h3 />} className="flex-row gap-4 p-6">
                   <div className="flex">
                     <span
                       className={cn(
