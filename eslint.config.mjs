@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Separate reference repo checked out inside this working directory —
+    // not part of this Next.js app.
+    "backend-repo/**",
   ]),
 ]);
 

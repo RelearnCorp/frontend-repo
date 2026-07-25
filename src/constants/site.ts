@@ -2,13 +2,15 @@ import type { NavItem } from "@/types";
 
 export const SITE_CONFIG = {
   name: "Relearn",
-  description: "A modern SaaS starter built with Next.js and shadcn/ui.",
+  description:
+    "AI-powered LMS with a Socratic AI Tutor, learning twin analytics, and teacher intelligence.",
 };
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Product", href: "#product" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Docs", href: "#docs" },
+  { label: "AI Tutor", href: "/tutor" },
+  { label: "Student Profile", href: "/profile" },
+  { label: "Teacher Dashboard", href: "/teacher" },
+  { label: "Platform Features", href: "/features" },
 ];
 
 export const FOOTER_LINKS: NavItem[] = [

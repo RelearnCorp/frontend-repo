@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import { useDisclosure } from "@/hooks/use-disclosure";
-import { NAV_ITEMS, SITE_CONFIG } from "@/constants/site";
-import { cn } from "@/lib/utils";
+import { SITE_CONFIG } from "@/constants/site";
 
 export function Navbar() {
   const { isOpen, toggle, close } = useDisclosure();
+  const { user } = useAuth();
+  const dashboardHref = user?.role?.name === "teacher" ? "/teacher" : "/profile";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
@@ -22,26 +24,16 @@ export function Navbar() {
           {SITE_CONFIG.name}
         </Link>
 
-        <ul className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          {NAV_ITEMS.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className="transition-colors hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="hidden items-center gap-2 md:flex">
-          <Link href="#login" className={cn(buttonVariants({ variant: "ghost" }))}>
-            Log in
+        <div className="hidden items-center gap-4 md:flex">
+          <Link
+            href={user ? dashboardHref : "/login"}
+            className="text-sm font-semibold hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          >
+            {user ? "Dashboard" : "Sign In"}
           </Link>
-          <Link href="#signup" className={cn(buttonVariants())}>
-            Get started
-          </Link>
+          <Button className="rounded-full shadow-sm hover:shadow-md transition-all gap-1.5 px-5">
+            Contact Us <ArrowRight className="size-4" />
+          </Button>
         </div>
 
         <Button
@@ -58,34 +50,17 @@ export function Navbar() {
 
       {isOpen && (
         <div className="border-t border-border px-4 py-4 md:hidden">
-          <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={close}
-                  className="transition-colors hover:text-foreground"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <Link
-              href="#login"
+              href={user ? dashboardHref : "/login"}
               onClick={close}
-              className={cn(buttonVariants({ variant: "outline" }))}
+              className="text-sm font-semibold text-center py-2"
             >
-              Log in
+              {user ? "Dashboard" : "Sign In"}
             </Link>
-            <Link
-              href="#signup"
-              onClick={close}
-              className={cn(buttonVariants())}
-            >
-              Get started
-            </Link>
+            <Button className="rounded-full gap-1.5 w-full">
+              Contact Us <ArrowRight className="size-4" />
+            </Button>
           </div>
         </div>
       )}
