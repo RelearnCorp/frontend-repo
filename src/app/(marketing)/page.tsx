@@ -3,6 +3,7 @@ import { ArrowRight, Rocket, ShieldCheck, Sparkles } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { H1, H2, H3, Lead } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
 const FEATURES = [
@@ -30,13 +31,13 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-24 py-16">
       <section className="relative flex flex-col items-center gap-6 text-center py-12 lg:py-20">
-        <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-balance sm:text-6xl md:text-7xl leading-tight">
+        <H1 className="max-w-3xl text-5xl text-balance sm:text-6xl md:text-7xl leading-tight">
           Learning that <span className="font-handwriting text-indigo-500 font-normal text-[1.2em]">asks</span> the <span className="font-handwriting text-amber-500 font-normal text-[1.2em]">right</span> questions
-        </h1>
-        <p className="max-w-xl text-lg text-muted-foreground text-balance">
+        </H1>
+        <Lead className="max-w-xl text-balance">
           Relearn pairs a Socratic AI Tutor with learning twin analytics, so
           students think actively and teachers see exactly where to help.
-        </p>
+        </Lead>
         <div className="flex flex-col gap-3 sm:flex-row mt-4">
           <Link href="/login" className={cn(buttonVariants({ size: "lg" }), "rounded-full px-8 shadow-sm hover:shadow-md transition-all")}>
             Get started
@@ -46,9 +47,9 @@ export default function Home() {
       </section>
 
       <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold tracking-tight text-left">
+        <H2 className="text-3xl text-left">
           Our <span className="font-handwriting text-indigo-500 font-normal text-4xl">interactive</span> features
-        </h2>
+        </H2>
         <section
           id="product"
           className="grid grid-cols-1 gap-6 sm:grid-cols-3"
@@ -75,7 +76,7 @@ export default function Home() {
                 <Icon className="size-6" />
               </div>
               <div className="space-y-3 z-10 px-2">
-                <h3 className="text-2xl font-bold leading-tight">{title}</h3>
+                <H3 className="text-2xl leading-tight tracking-normal">{title}</H3>
                 <p className={cn("text-sm", descColor[idx % 3])}>{description}</p>
               </div>
             </Card>

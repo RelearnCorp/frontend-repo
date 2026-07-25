@@ -2,6 +2,7 @@
 
 import { Zap } from "lucide-react";
 import { InitialsAvatar } from "@/components/app/initials-avatar";
+import { H2, Muted } from "@/components/ui/typography";
 import { useAuth } from "@/hooks/use-auth";
 
 export function ProfileHeaderLive() {
@@ -21,10 +22,10 @@ export function ProfileHeaderLive() {
         </span>
       </span>
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">{name}</h2>
-        <p className="text-sm text-muted-foreground">
+        <H2>{name}</H2>
+        <Muted>
           Active Learner • {user?.role?.name === "student" ? "Enrolled Student" : (user?.role?.name ?? "Guest")}
-        </p>
+        </Muted>
         <p className="flex items-center gap-5 pt-2 text-sm">
           <span>
             <span className="font-bold text-indigo-600 dark:text-indigo-400">

@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Eyebrow, Muted } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import { aiApi } from "@/services/api";
 import { tokenStore } from "@/services/http";
@@ -202,9 +203,9 @@ function ChartCard() {
       </CardHeader>
       <CardContent className="py-5">
         <EnergyCurveChart />
-        <p className="mt-3 rounded-lg border px-4 py-2.5 text-xs text-muted-foreground">
+        <Muted className="mt-3 rounded-lg border px-4 py-2.5 text-xs">
           Visualizing: Kinetic Energy (KE = ½mv²) with Mass = 2kg
-        </p>
+        </Muted>
       </CardContent>
     </Card>
   );
@@ -231,9 +232,9 @@ function BreakdownCard({ onContinue }: { onContinue: () => void }) {
               </span>
               <div>
                 <p className="text-sm font-bold">{step.title}</p>
-                <p className="pt-1 text-sm leading-relaxed text-muted-foreground">
+                <Muted className="pt-1 text-sm leading-relaxed">
                   {step.body}
-                </p>
+                </Muted>
               </div>
             </li>
           ))}
@@ -431,7 +432,7 @@ export function TutorSession() {
           </Button>
         </form>
 
-        <p className="flex items-center justify-center gap-5 pt-3 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+        <Eyebrow className="flex items-center justify-center gap-5 pt-3 text-[10px]">
           <span className="flex items-center gap-1.5">
             <span
               className={cn(
@@ -449,7 +450,7 @@ export function TutorSession() {
             <span className="size-1.5 rounded-full bg-indigo-500" />
             RAG Verified
           </span>
-        </p>
+        </Eyebrow>
       </div>
     </div>
   );

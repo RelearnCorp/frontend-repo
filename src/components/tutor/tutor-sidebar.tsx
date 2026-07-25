@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Eyebrow, Muted } from "@/components/ui/typography";
 
 const QUICK_REVIEW_CARDS = [
   {
@@ -40,10 +41,10 @@ export function TutorSidebar() {
     <aside className="hidden w-[320px] shrink-0 flex-col gap-7 overflow-y-auto border-r bg-background p-5 xl:flex">
       <section>
         <div className="flex items-center justify-between pb-3">
-          <h2 className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
+          <Eyebrow render={<h2 />} className="flex items-center gap-2 text-xs text-foreground">
             <Lightbulb className="size-4 text-amber-500" />
             Hint Buddy
-          </h2>
+          </Eyebrow>
           <Badge className="bg-amber-100 text-[10px] font-bold tracking-wide text-amber-700 uppercase dark:bg-amber-950 dark:text-amber-300">
             Nudge Ready
           </Badge>
@@ -70,10 +71,10 @@ export function TutorSidebar() {
 
       <section>
         <div className="flex items-center justify-between pb-3">
-          <h2 className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
+          <Eyebrow render={<h2 />} className="flex items-center gap-2 text-xs text-foreground">
             <Layers className="size-4 text-indigo-500" />
             Quick Review
-          </h2>
+          </Eyebrow>
           <span className="text-[11px] font-medium text-muted-foreground">
             {QUICK_REVIEW_CARDS.length} Cards
           </span>
@@ -100,10 +101,10 @@ export function TutorSidebar() {
 
       <section className="mt-auto">
         <div className="flex items-center justify-between pb-3">
-          <h2 className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
+          <Eyebrow render={<h2 />} className="flex items-center gap-2 text-xs text-foreground">
             <Waypoints className="size-4 text-teal-500" />
             Concept Map
-          </h2>
+          </Eyebrow>
           <Button variant="ghost" size="icon-xs" aria-label="Expand concept map">
             <Maximize2 />
           </Button>
@@ -114,9 +115,9 @@ export function TutorSidebar() {
               Energy vs. Velocity (v²)
             </figcaption>
             <EnergyCurveChart compact className="px-2" />
-            <p className="mx-(--card-spacing) mt-2 rounded-lg bg-card px-3 py-2 text-[11px] text-muted-foreground ring-1 ring-foreground/5">
+            <Muted className="mx-(--card-spacing) mt-2 rounded-lg bg-card px-3 py-2 text-[11px] ring-1 ring-foreground/5">
               Visualizing: Kinetic Energy vs. Velocity Squared
-            </p>
+            </Muted>
           </figure>
         </Card>
       </section>

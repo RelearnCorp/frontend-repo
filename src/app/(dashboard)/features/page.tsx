@@ -29,6 +29,7 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Eyebrow, H1, Muted, Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -141,7 +142,9 @@ function SectionHeading({
         <span className="flex size-6 items-center justify-center rounded-md bg-muted text-xs font-bold text-muted-foreground">
           {number}
         </span>
-        <h2 className="text-xl font-bold tracking-tight">{title}</h2>
+        <Typography variant="h3" render={<h2 />}>
+          {title}
+        </Typography>
         {badge && (
           <Badge className="ml-auto bg-indigo-50 text-[10px] font-bold tracking-wider text-indigo-600 uppercase dark:bg-indigo-950/60 dark:text-indigo-300">
             {badge}
@@ -168,14 +171,12 @@ export default function FeaturesPage() {
 
         <main className="mx-auto max-w-6xl w-full space-y-14 p-6 lg:p-10">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">
-              Platform Capabilities
-            </h1>
-            <p className="max-w-xl pt-3 text-muted-foreground">
+            <H1>Platform Capabilities</H1>
+            <Muted className="max-w-xl pt-3 text-base">
               Detailed breakdown of Relearn&apos;s core architectural epics,
               integrating traditional LMS foundations with advanced AI cognitive
               models.
-            </p>
+            </Muted>
           </div>
 
           <section className="space-y-6">
@@ -198,9 +199,9 @@ export default function FeaturesPage() {
                     </span>
                   </div>
                   <div>
-                    <p className="pt-1.5 text-xs leading-relaxed text-muted-foreground">
+                    <Muted className="pt-1.5 text-xs leading-relaxed">
                       {feature.description}
-                    </p>
+                    </Muted>
                   </div>
                 </DashboardCard>
               ))}
@@ -222,9 +223,9 @@ export default function FeaturesPage() {
                     <span className="size-2 rounded-full bg-emerald-500" />
                     Socratic Mode Active
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <Muted className="text-xs">
                     Context: Physics 101 - Thermodynamics
-                  </p>
+                  </Muted>
                 </div>
 
                 <div className="space-y-6">
@@ -282,9 +283,9 @@ export default function FeaturesPage() {
 
               <aside className="space-y-6 border-t bg-muted/40 p-6 lg:border-t-0 lg:border-l">
                 <div>
-                  <h4 className="pb-4 text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+                  <Eyebrow render={<h4 />} className="pb-4">
                     Model Parameters
-                  </h4>
+                  </Eyebrow>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between gap-3">
                       <Label htmlFor="rag-grounding" className="font-normal">
@@ -301,13 +302,13 @@ export default function FeaturesPage() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="pb-2 text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+                  <Eyebrow render={<h4 />} className="pb-2">
                     Teacher Materials (RAG)
-                  </h4>
-                  <p className="text-xs leading-relaxed text-muted-foreground">
+                  </Eyebrow>
+                  <Muted className="text-xs leading-relaxed">
                     Responses are strictly grounded in uploaded syllabus and
                     lecture notes to prevent hallucination.
-                  </p>
+                  </Muted>
                   <div className="mt-3 flex items-center gap-2.5 rounded-lg border bg-card px-3 py-2.5">
                     <FileText className="size-4 shrink-0 text-rose-500" />
                     <span className="truncate text-xs font-medium">
@@ -394,9 +395,9 @@ export default function FeaturesPage() {
                       <tool.icon className="size-5" />
                     </span>
                     <div>
-                      <p className="pt-1.5 text-xs leading-relaxed text-muted-foreground">
+                      <Muted className="pt-1.5 text-xs leading-relaxed">
                         {tool.description}
-                      </p>
+                      </Muted>
                       <Button
                         variant="link"
                         className={cn("mt-3 h-auto p-0 font-bold", tool.actionClass)}

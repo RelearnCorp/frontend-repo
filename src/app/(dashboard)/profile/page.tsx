@@ -17,6 +17,7 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 import { Progress } from "@/components/ui/progress";
 import { CourseProgressLive } from "@/components/app/course-progress-live";
 import { ProfileHeaderLive } from "@/components/app/profile-header-live";
+import { Muted } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -97,9 +98,9 @@ export default function ProfilePage() {
                   <span className="size-1.5 rounded-full bg-teal-500" />
                   On Track
                 </Badge>
-                <p className="pt-2 text-xs text-muted-foreground">
+                <Muted className="pt-2 text-xs">
                   Next Milestone: Quantum Physics Cert.
-                </p>
+                </Muted>
               </div>
             </DashboardCard>
 
@@ -129,9 +130,9 @@ export default function ProfilePage() {
                   +12% vs last month
                 </span>
               </p>
-              <p className="pt-2 text-xs leading-relaxed text-muted-foreground">
+              <Muted className="pt-2 text-xs leading-relaxed">
                 Calculated based on retention and engagement metrics.
-              </p>
+              </Muted>
             </DashboardCard>
 
             <DashboardCard 
@@ -168,10 +169,10 @@ export default function ProfilePage() {
                     </div>
                   </Progress>
                 ))}
-                <p className="text-xs leading-relaxed text-muted-foreground">
+                <Muted className="text-xs leading-relaxed">
                   Aria prefers discovering answers through guided questioning
                   rather than direct explanations.
-                </p>
+                </Muted>
               </div>
             </DashboardCard>
 

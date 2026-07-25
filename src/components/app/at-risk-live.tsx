@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { classesApi } from "@/services/api";
 import { LiveStatusBadge } from "@/components/app/live-status-badge";
+import { Muted } from "@/components/ui/typography";
 import { useLiveData } from "@/hooks/use-live-data";
 import { cn } from "@/lib/utils";
 
@@ -107,9 +108,9 @@ export function AtRiskLive() {
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-muted-foreground"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
             </div>
             <p className="text-sm font-semibold">No students found</p>
-            <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+            <Muted className="text-xs mt-1 max-w-[200px]">
               Share your class code with students to start tracking their progress.
-            </p>
+            </Muted>
           </div>
         ) : (
           students.map((student) => (
@@ -137,9 +138,9 @@ export function AtRiskLive() {
                 DM
               </Button>
             </div>
-            <p className="pt-3 text-xs leading-relaxed text-muted-foreground">
+            <Muted className="pt-3 text-xs leading-relaxed">
               {student.detail}
-            </p>
+            </Muted>
           </div>
           ))
         )}

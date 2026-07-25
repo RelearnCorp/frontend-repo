@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { analyticsApi } from "@/services/api";
 import { LiveStatusBadge } from "@/components/app/live-status-badge";
+import { Muted } from "@/components/ui/typography";
 import { useLiveData } from "@/hooks/use-live-data";
 import { cn } from "@/lib/utils";
 
@@ -70,9 +71,7 @@ export function RecentActivityLive() {
             />
             <div>
               <p className="text-sm font-semibold">{activity.title}</p>
-              <p className="text-xs text-muted-foreground">
-                {activity.detail}
-              </p>
+              <Muted className="text-xs">{activity.detail}</Muted>
             </div>
           </li>
         ))}

@@ -8,6 +8,7 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 import { Progress } from "@/components/ui/progress";
 import { materialsApi, classesApi } from "@/services/api";
 import { LiveStatusBadge } from "@/components/app/live-status-badge";
+import { Muted } from "@/components/ui/typography";
 import { useLiveData } from "@/hooks/use-live-data";
 import { cn } from "@/lib/utils";
 import type { MaterialFileType } from "@/types/api";
@@ -150,9 +151,9 @@ export function MaterialEffectivenessLive() {
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-muted-foreground"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
             <p className="text-sm font-semibold">No materials uploaded</p>
-            <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+            <Muted className="text-xs mt-1 max-w-[200px]">
               Upload PDFs and videos to ground your AI Tutor in real curriculum.
-            </p>
+            </Muted>
           </div>
         ) : (
           <ul className="space-y-5">
@@ -190,9 +191,7 @@ export function MaterialEffectivenessLive() {
                   </p>
                 </div>
               </Progress>
-              <p className="pt-1.5 text-xs text-muted-foreground">
-                {material.detail}
-              </p>
+              <Muted className="pt-1.5 text-xs">{material.detail}</Muted>
             </div>
           </li>
         ))}

@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
+import { Eyebrow, Muted } from "@/components/ui/typography";
 import {
   Sheet,
   SheetContent,
@@ -139,9 +140,9 @@ function SidebarNav({ sections }: { sections: SidebarSection[] }) {
     <nav className="flex-1 space-y-7 overflow-y-auto px-3 py-4">
       {sections.map((section) => (
         <div key={section.label}>
-          <p className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+          <Eyebrow className="px-3 pb-2 font-semibold">
             {section.label}
-          </p>
+          </Eyebrow>
           <ul className="space-y-1">
             {section.items.map((item) => {
               const Icon = SIDEBAR_ICONS[item.icon];
@@ -212,9 +213,7 @@ function SidebarUserCard({ user }: { user: SidebarUser }) {
             <p className="truncate text-sm font-semibold text-sidebar-foreground">
               {user.name}
             </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {user.role}
-            </p>
+            <Muted className="truncate text-xs">{user.role}</Muted>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" side="top" className="w-56">

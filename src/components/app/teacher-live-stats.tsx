@@ -12,6 +12,7 @@ import {
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { analyticsApi } from "@/services/api";
 import { LiveStatusBadge } from "@/components/app/live-status-badge";
+import { Muted } from "@/components/ui/typography";
 import { useLiveData } from "@/hooks/use-live-data";
 import { cn } from "@/lib/utils";
 
@@ -117,7 +118,7 @@ export function TeacherLiveStats() {
               </span>
             )}
           </p>
-          <p className="pt-2 text-xs text-muted-foreground">{stat.caption}</p>
+          <Muted className="pt-2 text-xs">{stat.caption}</Muted>
         </DashboardCard>
       ))}
     </div>
