@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Caveat } from "next/font/google";
 import "./globals.css";
 
-import { Footer } from "@/components/common/footer";
-import { MainWrapper } from "@/components/common/main-wrapper";
-import { Navbar } from "@/components/common/navbar";
 import { SITE_CONFIG } from "@/constants/site";
 
 const geistSans = Geist({
@@ -17,8 +14,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const caveat = Caveat({
+  variable: "--font-handwriting",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: SITE_CONFIG.name,
+  title: {
+    default: SITE_CONFIG.name,
+    template: `%s — ${SITE_CONFIG.name}`,
+  },
   description: SITE_CONFIG.description,
 };
 
@@ -30,13 +35,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
-        <Navbar />
-        <MainWrapper>{children}</MainWrapper>
-        <Footer />
-      </body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }
