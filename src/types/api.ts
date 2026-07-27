@@ -122,6 +122,8 @@ export type ApiQuiz = {
   created_at: string;
 };
 
+export type QuizListData = { quizzes: ApiQuiz[]; count: number };
+
 export type ApiQuestion = {
   id: string;
   quiz_id?: string;
