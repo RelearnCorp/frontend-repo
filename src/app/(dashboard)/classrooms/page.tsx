@@ -54,11 +54,18 @@ export default function ClassroomsPage() {
                 : "Join and view your enrolled classes"}
             </p>
           </div>
-          {isTeacher && (
+          {isTeacher ? (
             <Link href="/classrooms/create">
               <Button size="lg" className="gap-2">
                 <Plus className="size-5" />
                 Create Class
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/classrooms/enroll">
+              <Button size="lg" className="gap-2">
+                <Plus className="size-5" />
+                Join Class
               </Button>
             </Link>
           )}
@@ -83,6 +90,17 @@ export default function ClassroomsPage() {
                 ? "Create your first class to get started"
                 : "Ask your teacher for a class code to join a classroom"}
             </p>
+            <div className="mt-6 flex justify-center">
+              {isTeacher ? (
+                <Link href="/classrooms/create">
+                  <Button variant="outline">Create a Class</Button>
+                </Link>
+              ) : (
+                <Link href="/classrooms/enroll">
+                  <Button variant="outline">Join a Class</Button>
+                </Link>
+              )}
+            </div>
           </div>
         )}
 
