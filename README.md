@@ -1,13 +1,15 @@
 # Relearn
 
-AI-powered learning platform: Socratic AI tutor for students, and a class
-intelligence dashboard for teachers (at-risk alerts, material effectiveness,
-AI usage transparency).
+AI-powered LMS: teachers create classes, upload materials, and build
+quizzes; students join with a class code, work through materials, take
+quizzes with AI hints, and chat with a Socratic AI tutor.
 
 Frontend only — this repo talks to a separate backend at
 [RelearnCorp/Backend-repository](https://github.com/RelearnCorp/Backend-repository)
-over a REST API. Data on screen is a mix of real API data and mock/demo data
-where the backend doesn't have an endpoint yet (see [Live vs. preview data](#live-vs-preview-data)).
+over a REST API. Every page on screen is backed by a real API call; there
+is no mock/demo data fallback anywhere in the app (see
+[Known gaps](#known-gaps) for the handful of things the backend doesn't
+support yet).
 
 ## Tech stack
 
@@ -15,6 +17,8 @@ where the backend doesn't have an endpoint yet (see [Live vs. preview data](#liv
 - React 19
 - Tailwind CSS
 - [Base UI](https://base-ui.com) for headless components (not Radix — see note below)
+- [Zod](https://zod.dev) for form validation
+- [Recharts](https://recharts.org) for the analytics charts
 
 ## Getting started
 
@@ -26,106 +30,131 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000).
 
 By default the app expects the backend at `http://localhost:3001`. Copy
-`.env.example` to `.env.local` and adjust if it's running elsewhere:
+`.env.example` to `.env.local` and adjust if it's running elsewhere (e.g.
+a deployed backend URL):
 
 ```bash
 cp .env.example .env.local
 ```
-
-If the backend isn't running, the app still loads — dashboard cards fall
-back to mock data and show a **"Preview data"** badge instead of crashing
-(see below).
 
 ## Routes
 
 | Route | Access | Description |
 | --- | --- | --- |
 | `/` | Public | Marketing landing page. |
-| `/login` | Public | Sign in or register. Toggles between the two modes in place (no separate `/register` route). New accounts always start as `student`. |
-| `/profile` | Student/teacher (signed in) | Student dashboard — course progress, misconception heatmap, recent activity, AI interaction style. |
-| `/teacher` | Signed in | Teacher intelligence dashboard — class stats, at-risk students, AI transparency, material effectiveness. *(Reachable by anyone signed in; there's no role check yet that blocks a student from opening it directly — see [Known gaps](#known-gaps).)* |
-| `/tutor` | Signed in | The AI tutor chat session (Socratic mode). |
-| `/features` | Signed in | Internal capability showcase (Core LMS / AI Tutor / Teacher Analytics / Chatbot Buddy breakdown). **Not linked from any nav** — orphan page, direct-URL only. |
+| `/login` | Public | Sign in or register in place (no separate `/register` route). Registration includes a Student/Teacher toggle — see [Known gaps](#known-gaps), the backend doesn't honor it yet. |
+| `/classrooms` | Signed in | List classes. Teacher: create a class. Student: join with a code. |
+| `/classrooms/create` | Teacher only | Create-class form. |
+| `/classrooms/enroll` | Student only | Join-by-code form. |
+| `/classrooms/[classId]` | Signed in | Class detail — roster and class code (teacher), leave class (student). |
+| `/classrooms/[classId]/materials` | Signed in | Upload material (teacher) / view materials (both). |
+| `/classrooms/[classId]/quizzes` | Signed in | Quizzes hub — create-quiz link (teacher) or quiz-ID entry (student); see [Known gaps](#known-gaps) for why there's no quiz list. |
+| `/classrooms/[classId]/quizzes/create` | Teacher only | Quiz builder — create quiz + add questions. |
+| `/classrooms/[classId]/quizzes/[quizId]` | Signed in | Quiz hub — share link (teacher) or start quiz (student). |
+| `/classrooms/[classId]/quizzes/[quizId]/attempt/[attemptId]` | Student only | Take the quiz, answer questions, request an AI hint per question. |
+| `/classrooms/[classId]/quizzes/[quizId]/result/[attemptId]` | Student only | Result shown right after submitting. |
+| `/analytics` | Signed in | Teacher: per-class quiz stats and AI usage breakdown. Student: overall progress and quiz history. |
+| `/tutor` | Student only | Socratic AI tutor chat, scoped to a selected class's materials. |
+| `/profile` | Signed in | Redirects to `/analytics`. |
 
-`/profile` and `/teacher` are Next.js *route groups* (`(dashboard)`,
-`(marketing)`) — the parentheses don't appear in the URL.
+`/classrooms/*`, `/analytics`, `/tutor`, and `/profile` all live under the
+`(dashboard)` route group; `/` under `(marketing)`. The parentheses don't
+appear in the URL.
 
 ### Auth guard
 
-Tokens are stored in `localStorage`, not a cookie, so there's no session for
-Next.js middleware to read on the edge. Route protection happens client-side
-instead: `/profile`, `/teacher`, and `/tutor` are wrapped in an `AuthGuard`
-component that checks for an access token on mount and redirects to
-`/login` if there isn't one.
+Tokens are stored in `localStorage`, not a cookie, so there's no session
+for Next.js middleware to read on the edge. Route protection happens
+client-side instead, via `AuthGuard`:
+
+- Every route under `(dashboard)` requires a token (redirects to `/login`
+  if missing) — wired once in `src/app/(dashboard)/layout.tsx`, which also
+  renders the sidebar for every route.
+- Single-purpose, single-role pages additionally pass `role="teacher"` or
+  `role="student"` to `AuthGuard` (create class, enroll, create quiz, take
+  quiz, `/tutor`) — the wrong role is redirected to `/classrooms` before
+  the page renders, instead of only failing after a submit.
 
 ## App flow
 
 ```mermaid
 flowchart TD
-    Landing["/  (marketing landing)"] -->|"Sign In / Dashboard"| Login["/login"]
+    Landing["/  (marketing landing)"] -->|"Get Started / Dashboard"| Login["/login"]
 
     Login -->|"toggle mode"| Login
-    Login -->|"submit: log in"| Auth{"role?"}
-    Login -->|"submit: register\n(always creates a student)"| Auth
+    Login -->|"submit: log in or register"| Classrooms["/classrooms"]
 
-    Auth -->|teacher| TeacherDash["/teacher\nTeacher Intelligence Dashboard"]
-    Auth -->|student / admin| Profile["/profile\nStudent Dashboard"]
+    Classrooms -->|"open a class"| ClassDetail["/classrooms/[id]"]
+    ClassDetail --> Materials["/classrooms/[id]/materials"]
+    ClassDetail --> Quizzes["/classrooms/[id]/quizzes"]
 
-    Profile -->|"Start Session"| Tutor["/tutor\nAI Tutor chat"]
-    Tutor -->|"back arrow"| Profile
+    Quizzes -->|teacher| QuizCreate["/classrooms/[id]/quizzes/create"]
+    Quizzes -->|student, has a link/ID| QuizHub["/classrooms/[id]/quizzes/[quizId]"]
+    QuizHub -->|"Start Quiz"| Attempt["/classrooms/[id]/quizzes/[quizId]/attempt/[attemptId]"]
+    Attempt -->|submit| Result["/classrooms/[id]/quizzes/[quizId]/result/[attemptId]"]
 
-    Profile -->|"sidebar user card -> Log out"| Login
-    TeacherDash -->|"sidebar user card -> Log out"| Login
+    Classrooms -->|sidebar| Analytics["/analytics"]
+    Classrooms -->|sidebar, student| Tutor["/tutor"]
 
-    Guest["not signed in"] -.->|"visits /profile, /teacher, or /tutor"| Login
+    Classrooms -->|"sidebar user card -> Log out"| Login
+
+    Guest["not signed in"] -.->|"visits any (dashboard) route"| Login
 ```
 
-Narrative version:
-
-1. **`/`** — anyone lands here first. The navbar shows "Sign In" (or
+1. **`/`** — anyone lands here first. The navbar shows "Get Started" (or
    "Dashboard" if a session already exists in `localStorage`).
-2. **`/login`** — one form, two modes (`Sign in` / `Create account`) toggled
-   in place, no page navigation between them. Registering always creates a
-   `student` account; there's no teacher sign-up flow yet.
-3. On successful login/register, the app redirects by role:
-   - `role.name === "teacher"` → **`/teacher`**
-   - anything else (`student`, `admin`) → **`/profile`**
-4. From **`/profile`**, the "Start Session" button under "AI Interaction
-   Style" opens **`/tutor`**. The back arrow in the tutor header returns to
-   `/profile`.
-5. From either dashboard, clicking the user card at the bottom of the
-   sidebar opens a menu with **Log out**, which clears the session and
-   returns to `/login`.
-6. Visiting `/profile`, `/teacher`, or `/tutor` without a session
-   redirects straight to `/login`.
-
-## Live vs. preview data
-
-Several dashboard cards (Course Progress, Recent Activity, At-Risk
-students, Material Effectiveness, AI Transparency, teacher stats) call the
-backend on mount via `useLiveData`. If the call fails — backend down,
-network error, endpoint not built yet — the card falls back to bundled
-mock data and shows an amber **"Preview data"** badge instead of pretending
-it's real. This is intentional: several backend endpoints don't exist yet
-(e.g. per-student risk metrics), so the mock fallback is what makes the UI
-demoable ahead of full API coverage.
+2. **`/login`** — one form, two modes (`Sign in` / `Create account`)
+   toggled in place. Registering shows a Student/Teacher toggle, but the
+   backend currently always creates a `student` account regardless (see
+   [Known gaps](#known-gaps)).
+3. On successful login/register, everyone lands on **`/classrooms`** —
+   the page itself branches by role (create-class vs. join-by-code, etc.),
+   there's no separate per-role landing route anymore.
+4. From a class, teachers manage materials/quizzes; students view
+   materials and take quizzes. The sidebar (present on every dashboard
+   route) links to `/classrooms`, `/analytics`, and — for students —
+   `/tutor`.
+5. Clicking the user card at the bottom of the sidebar opens a menu with
+   **Log out**, which clears the session and returns to `/login`.
+6. Visiting any `(dashboard)` route without a session redirects straight
+   to `/login`; visiting a role-mismatched page redirects to `/classrooms`.
 
 ## Known gaps
 
-Left as-is intentionally rather than half-built; flagging for follow-up:
+These are backend limitations, not unfinished frontend work — the UI is
+built and calls the real endpoint/shape the backend is expected to
+support; it just can't be fully exercised until the backend catches up.
 
-- **No role check on `/teacher`** — any signed-in user can open it directly
-  by URL, not just teachers.
-- **`/features` is unreachable from any nav** — direct-URL only.
-- Several controls are visibly disabled with a "Coming soon" tooltip
-  because there's no page/endpoint behind them yet: sidebar items other
-  than the active one, Notifications, Sync Analytics, Generate Weekly
-  Report, View All, Manage Files, Forgot password, DM.
-- No `/courses/{id}` (or `/courses` list) page exists yet.
-- The "Contact Us" button in the marketing navbar has no destination yet
-  (no `href`/`onClick`) — a decorative CTA until there's a real contact
-  mechanism to wire it to. The "About Us" nav link (`#about`) is also a
-  dead anchor — no matching section exists on the homepage yet.
+- **No teacher self-registration.** `POST /auth/register` always assigns
+  the student role server-side (`getStudentRoleId()`), regardless of
+  input. The registration form's Student/Teacher toggle already sends a
+  `role` field — the backend's zod schema silently drops it today rather
+  than rejecting the request, so this is a no-op until the backend reads
+  and honors it. Until then, granting a teacher account means updating
+  `users.role_id` directly in the database.
+- **No endpoint to list a class's quizzes.** `getClassQuizzes()` exists
+  unused in the backend's `lib/database/queries.ts`, but no route exposes
+  it. The Quizzes tab can't show past quizzes — teachers get a shareable
+  direct link after creating one instead, and students paste a quiz ID/link
+  to start one.
+- **No chat-session-creation endpoint.** `POST /ai/chat` requires an
+  existing `chat_sessions` row and 404s (`SESSION_NOT_FOUND`) for a
+  client-generated session id. `createChatSession()` exists unused in the
+  backend; until a route creates one, `/tutor` shows the real error
+  instead of a scripted fallback reply.
+- **`/analytics` 500s.** `GET /analytics/progress` (and likely
+  `/analytics/dashboard`, `/analytics/ai-usage`) fail — the backend's
+  query code filters/selects `quiz_attempts.status`, `.percentage_score`,
+  and `.completed_at`, but `lib/database/migrations.sql` only defines
+  `started_at, submitted_at, score, learning_mode` on that table. Needs
+  checking against the live schema; likely a migration to add the
+  missing columns.
+- **No password reset.** There's no backend endpoint for it, so there's
+  no "Forgot password?" affordance in the UI either — removed rather than
+  left as a disabled button.
+- The footer's Privacy/Terms/Contact links (`#privacy`, `#terms`,
+  `#contact`) are placeholder anchors — no corresponding sections exist
+  yet.
 - This project's `Button` is [Base UI](https://base-ui.com), **not
   Radix** — use the `render` prop to compose it with `<Link>`, not
   `asChild` (which doesn't exist here and fails silently).

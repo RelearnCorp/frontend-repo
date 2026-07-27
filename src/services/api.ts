@@ -32,6 +32,15 @@ export const authApi = {
     email: string;
     password: string;
     full_name: string;
+    /**
+     * Sent ahead of backend support — `POST /auth/register` currently
+     * always assigns the student role regardless of this field (see
+     * `getStudentRoleId()` in the backend's register route), so a
+     * teacher signup still lands as a student until that's fixed
+     * server-side. Harmless to send in the meantime: the backend's zod
+     * schema silently strips unknown fields rather than rejecting them.
+     */
+    role?: "teacher" | "student";
   }) => {
     const data = await http.post<AuthData>("/auth/register", input, {
       auth: false,
