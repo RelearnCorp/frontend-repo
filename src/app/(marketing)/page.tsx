@@ -23,7 +23,7 @@ const FEATURES = [
     icon: Sparkles,
     title: "Teacher intelligence",
     description:
-      "Learning twin analytics, risk alerts, and concept heatmaps show exactly which students and topics need attention.",
+      "Class-by-class quiz scores and AI usage analytics show exactly how each class is doing and where students are relying on AI help.",
   },
 ];
 

@@ -1,19 +1,70 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Copy, Users, AlertCircle, FileText, HelpCircle } from "lucide-react";
+import { ArrowLeft, Copy, LoaderCircle, Users, FileText, HelpCircle } from "lucide-react";
 import { classesApi } from "@/services/api";
 import { ApiError } from "@/services/http";
 import { useAuth } from "@/hooks/use-auth";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type { ClassDetailData } from "@/types/api";
+
+function LeaveClassButton({ classId }: { classId: string }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  const handleLeave = async () => {
+    setError(null);
+    setIsLeaving(true);
+    try {
+      await classesApi.leave(classId);
+      router.push("/classrooms");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to leave class");
+      setIsLeaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="destructive" />}>
+        Leave Class
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Leave this class?</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          You&apos;ll lose access to its materials and quizzes unless you
+          rejoin with the class code.
+        </p>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleLeave} disabled={isLeaving}>
+            {isLeaving && <LoaderCircle className="animate-spin" />}
+            Leave Class
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function ClassDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { user } = useAuth();
   const classId = params.classId as string;
 
@@ -22,37 +73,39 @@ export default function ClassDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    loadClassDetail();
+  const loadClassDetail = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const data = await classesApi.detail(classId);
+
+      if (!data) {
+        setError("Class data not found");
+        return;
+      }
+
+      setClassData(data);
+    } catch (err) {
+      console.error("Failed to load class detail:", err);
+
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to load class details");
+      }
+    } finally {
+      setLoading(false);
+    }
   }, [classId]);
 
-const loadClassDetail = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-
-    const data = await classesApi.detail(classId);
-
-    if (!data) {
-      setError("Class data not found");
-      return;
-    }
-
-    setClassData(data);
-  } catch (err) {
-    console.error("Failed to load class detail:", err);
-
-    if (err instanceof ApiError) {
-      setError(err.message);
-    } else if (err instanceof Error) {
-      setError(err.message);
-    } else {
-      setError("Failed to load class details");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  useEffect(() => {
+    // Deferred a tick so the state updates inside loadClassDetail() happen in
+    // a promise callback rather than synchronously in the effect body.
+    Promise.resolve().then(() => loadClassDetail());
+  }, [loadClassDetail]);
 
   const isTeacher = user?.role?.name === "teacher" && user?.id === classData?.teacher_id;
 
@@ -61,16 +114,6 @@ const loadClassDetail = async () => {
       navigator.clipboard.writeText(classData.class_code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleLeaveClass = async () => {
-    if (!confirm("Are you sure you want to leave this class?")) return;
-    try {
-      await classesApi.leave(classId);
-      router.push("/classrooms");
-    } catch (err) {
-      alert("Failed to leave class");
     }
   };
 
@@ -94,12 +137,7 @@ const loadClassDetail = async () => {
           </Link>
         </div>
         <div className="flex items-center justify-center py-12">
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 max-w-md">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-              <p className="text-sm text-destructive">{error || "Class not found"}</p>
-            </div>
-          </div>
+          <Alert className="max-w-md">{error || "Class not found"}</Alert>
         </div>
       </div>
     );
@@ -131,27 +169,22 @@ const loadClassDetail = async () => {
 
           {/* Class Code Card (for teachers) */}
           {isTeacher && (
-            <DashboardCard>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold">Class Code</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Share this code with students to let them join
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <code className="bg-muted px-3 py-2 rounded font-mono font-bold text-lg">
-                    {classData.class_code}
-                  </code>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={copyClassCode}
-                    title={copied ? "Copied!" : "Copy code"}
-                  >
-                    <Copy className="size-4" />
-                  </Button>
-                </div>
+            <DashboardCard
+              title="Class Code"
+              description="Share this code with students to let them join"
+            >
+              <div className="flex items-center gap-2">
+                <code className="bg-muted px-3 py-2 rounded font-mono font-bold text-lg">
+                  {classData.class_code}
+                </code>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={copyClassCode}
+                  title={copied ? "Copied!" : "Copy code"}
+                >
+                  <Copy className="size-4" />
+                </Button>
               </div>
             </DashboardCard>
           )}
@@ -170,45 +203,32 @@ const loadClassDetail = async () => {
                 Quizzes
               </Button>
             </Link>
-            {!isTeacher && (
-              <Button
-                variant="destructive"
-                onClick={handleLeaveClass}
-              >
-                Leave Class
-              </Button>
-            )}
+            {!isTeacher && <LeaveClassButton classId={classId} />}
           </div>
 
           {/* Students List (for teachers) */}
           {isTeacher && (
-            <DashboardCard>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Users className="size-5" />
-                    <h3 className="font-semibold">Students ({classData.students.length})</h3>
-                  </div>
-                </div>
-
-                {classData.students.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No students enrolled yet</p>
-                ) : (
-                  <div className="space-y-2">
-                    {classData.students.map((student) => (
-                      <div key={student.id} className="flex items-center justify-between p-3 rounded border border-border hover:bg-muted/50 transition-colors">
-                        <div>
-                          <p className="font-medium text-sm">{student.full_name}</p>
-                          <p className="text-xs text-muted-foreground">{student.email}</p>
-                        </div>
-                        <span className="text-xs bg-muted px-2 py-1 rounded">
-                          {student.role?.name || "student"}
-                        </span>
+            <DashboardCard
+              title={`Students (${classData.students.length})`}
+              action={<Users className="size-5 text-muted-foreground" />}
+            >
+              {classData.students.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No students enrolled yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {classData.students.map((student) => (
+                    <div key={student.id} className="flex items-center justify-between p-3 rounded border border-border hover:bg-muted/50 transition-colors">
+                      <div>
+                        <p className="font-medium text-sm">{student.full_name}</p>
+                        <p className="text-xs text-muted-foreground">{student.email}</p>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <span className="text-xs bg-muted px-2 py-1 rounded">
+                        {student.role?.name || "student"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </DashboardCard>
           )}
         </div>

@@ -1,47 +1,78 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { useCallback } from "react";
+import { LoaderCircle } from "lucide-react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-const sampleData = [
-  { velocity: 0, ke: 0 },
-  { velocity: 2, ke: 4 },
-  { velocity: 4, ke: 16 },
-  { velocity: 6, ke: 36 },
-  { velocity: 8, ke: 64 },
-  { velocity: 10, ke: 100 },
-];
+import { Muted } from "@/components/ui/typography";
+import { useApiData } from "@/hooks/use-api-data";
+import { analyticsApi } from "@/services/api";
 
-export const InteractiveChart: React.FC = () => {
+/** Real recent-quiz-score trend for the selected class (no sample/fake data). */
+export function InteractiveChart({ classId }: { classId: string | null }) {
+  const fetcher = useCallback(
+    () => analyticsApi.progress(classId ?? undefined),
+    [classId],
+  );
+  const { data, status } = useApiData(fetcher);
+
+  if (!classId) return null;
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center gap-2 py-8 text-xs text-muted-foreground">
+        <LoaderCircle className="size-4 animate-spin" />
+        Loading scores…
+      </div>
+    );
+  }
+
+  const points = (data?.quizzes ?? [])
+    .filter((attempt) => attempt.percentage_score != null)
+    .slice()
+    .reverse()
+    .map((attempt, index) => ({
+      label: `#${index + 1}`,
+      score: attempt.percentage_score as number,
+    }));
+
+  if (points.length === 0) {
+    return (
+      <Muted className="py-4 text-center text-xs">
+        No quiz scores in this class yet.
+      </Muted>
+    );
+  }
+
   return (
-    <div className="my-4 rounded-xl border border-indigo-500/20 bg-[#18181b] p-4 text-white">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs">
-          <span>✨</span> Interactive Energy Scaling
-        </div>
-        <span className="text-[9px] uppercase tracking-wider font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
-          Live Simulation
-        </span>
-      </div>
-
-      <div className="h-56 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={sampleData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-            <XAxis dataKey="velocity" stroke="#71717a" fontSize={10} />
-            <YAxis stroke="#71717a" fontSize={10} />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '8px', fontSize: '11px' }}
-              itemStyle={{ color: '#818cf8' }}
-            />
-            <Line type="monotone" dataKey="ke" stroke="#6366f1" strokeWidth={2.5} dot={{ fill: '#818cf8', r: 4 }} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="mt-3 rounded-md bg-[#09090b] border border-gray-800 p-2 text-center text-[11px] text-gray-400">
-        Visualizing: Kinetic Energy <span className="text-indigo-300 font-mono">KE = ½mv²</span> with Mass = 2kg
-      </div>
+    <div className="h-40 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={points} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#71717a33" />
+          <XAxis dataKey="label" stroke="#71717a" fontSize={10} />
+          <YAxis stroke="#71717a" fontSize={10} domain={[0, 100]} />
+          <Tooltip
+            formatter={(value) => [`${value}%`, "Score"]}
+            contentStyle={{ borderRadius: 8, fontSize: 11 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="score"
+            name="Score %"
+            stroke="#6366f1"
+            strokeWidth={2.5}
+            dot={{ fill: "#6366f1", r: 4 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
-};
+}

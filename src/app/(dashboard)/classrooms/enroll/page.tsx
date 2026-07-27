@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LoaderCircle, ArrowLeft } from "lucide-react";
 import { z } from "zod";
 
+import { AuthGuard } from "@/components/app/auth-guard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -62,6 +63,7 @@ export default function EnrollPage() {
   };
 
   return (
+    <AuthGuard role="student">
     <div className="min-w-0 flex-1 flex flex-col">
       <div className="border-b border-border px-6 py-4 lg:px-8">
         <Link href="/classrooms" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -125,5 +127,6 @@ export default function EnrollPage() {
         </Card>
       </main>
     </div>
+    </AuthGuard>
   );
 }

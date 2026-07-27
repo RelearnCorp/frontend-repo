@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LoaderCircle, ArrowLeft, Plus, X } from "lucide-react";
 import { z } from "zod";
 
+import { AuthGuard } from "@/components/app/auth-guard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -144,6 +145,7 @@ export default function CreateQuizPage() {
   };
 
   return (
+    <AuthGuard role="teacher">
     <div className="min-w-0 flex-1 flex flex-col">
       <div className="border-b border-border px-6 py-4 lg:px-8">
         <Link href={`/classrooms/${classId}/quizzes`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -176,7 +178,9 @@ export default function CreateQuizPage() {
                   </Field>
 
                   <Field data-invalid={!!fieldErrors.description}>
-                    <FieldLabel htmlFor="description" optional>Description</FieldLabel>
+                    <FieldLabel htmlFor="description">
+                      Description <span className="font-normal text-muted-foreground">(optional)</span>
+                    </FieldLabel>
                     <Input
                       id="description"
                       value={formData.description}
@@ -201,7 +205,12 @@ export default function CreateQuizPage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Questions ({questions.length})</CardTitle>
-                  <CardDescription>Add questions to your quiz</CardDescription>
+                  <CardDescription>
+                    Add questions to your quiz — answers are graded as an
+                    exact match against &ldquo;Correct answer&rdquo;, so
+                    double-check spacing and capitalization for short answer
+                    and essay questions.
+                  </CardDescription>
                 </div>
                 {!showQuestionForm && (
                   <Button
@@ -219,7 +228,7 @@ export default function CreateQuizPage() {
               <CardContent className="space-y-4">
                 {questions.length === 0 && !showQuestionForm && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No questions added yet. Click Add Question to get started.
+                    No questions added yet. Click &ldquo;Add Question&rdquo; to get started.
                   </p>
                 )}
 
@@ -378,5 +387,6 @@ export default function CreateQuizPage() {
         </div>
       </main>
     </div>
+    </AuthGuard>
   );
 }
