@@ -55,11 +55,17 @@ export function useAuth() {
   }, []);
 
   const register = useCallback(
-    async (email: string, password: string, fullName: string) => {
+    async (
+      email: string,
+      password: string,
+      fullName: string,
+      role?: "teacher" | "student",
+    ) => {
       const data = await authApi.register({
         email,
         password,
         full_name: fullName,
+        role,
       });
       localStorage.setItem("relearn.user", JSON.stringify(data.user));
       emit();

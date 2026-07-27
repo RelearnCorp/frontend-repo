@@ -16,10 +16,13 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Muted } from "@/components/ui/typography";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiError } from "@/services/http";
+import { cn } from "@/lib/utils";
 
 type Mode = "login" | "register";
+type AccountRole = "student" | "teacher";
 
 const loginSchema = z.object({
   email: z.string().trim().min(1, "Email is required").email("Enter a valid email address"),
@@ -44,6 +47,7 @@ export function AuthForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accountRole, setAccountRole] = useState<AccountRole>("student");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +71,7 @@ export function AuthForm() {
       if (isLogin) {
         await login(email, password);
       } else {
-        await register(email, password, fullName);
+        await register(email, password, fullName, accountRole);
       }
       router.push("/classrooms");
     } catch (err) {
@@ -91,12 +95,42 @@ export function AuthForm() {
         <CardDescription>
           {isLogin
             ? "Sign in to continue learning with Relearn."
-            : "New accounts start as students. Password must be at least 8 characters."}
+            : "Password must be at least 8 characters."}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} id="auth-form" noValidate>
           <FieldGroup>
+            {isRegister && (
+              <Field>
+                <FieldLabel>I am a</FieldLabel>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["student", "teacher"] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      aria-pressed={accountRole === option}
+                      onClick={() => setAccountRole(option)}
+                      className={cn(
+                        "rounded-lg border px-3 py-1.5 text-sm font-semibold capitalize transition-colors",
+                        accountRole === option
+                          ? "border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300"
+                          : "text-muted-foreground hover:bg-muted",
+                      )}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                {accountRole === "teacher" && (
+                  <Muted className="text-xs">
+                    Teacher accounts are being rolled out — if this doesn&apos;t
+                    take effect right away, ask an admin to upgrade your
+                    account.
+                  </Muted>
+                )}
+              </Field>
+            )}
             {isRegister && (
               <Field data-invalid={!!fieldErrors.fullName}>
                 <FieldLabel htmlFor="full_name">Full name</FieldLabel>
