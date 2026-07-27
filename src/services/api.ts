@@ -23,6 +23,7 @@ import type {
   ApiClass,
   QuizAnswer,
   RefreshData,
+  QuizListData,
 } from "@/types/api";
 
 /** Typed client for every endpoint in RelearnCorp/Backend-repository. */
@@ -107,6 +108,11 @@ export const materialsApi = {
 };
 
 export const quizzesApi = {
+  list: (classId: string) =>
+    http.get<QuizListData>(
+      `/quizzes/list?class_id=${encodeURIComponent(classId)}`,
+    ),
+
   create: (input: {
     class_id: string;
     title: string;
