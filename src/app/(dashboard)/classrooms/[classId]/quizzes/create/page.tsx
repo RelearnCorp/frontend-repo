@@ -57,6 +57,7 @@ export default function CreateQuizPage() {
     options: { a: "", b: "", c: "", d: "" },
     correctAnswer: "a",
   });
+  const [questionFormError, setQuestionFormError] = useState<string | null>(null);
 
   const handleChange = (field: keyof CreateQuizForm, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -65,17 +66,19 @@ export default function CreateQuizPage() {
 
   const addQuestion = () => {
     if (!questionForm.text.trim()) {
-      alert("Please enter a question");
+      setQuestionFormError("Please enter a question");
       return;
     }
 
     if (questionForm.type === "multiple_choice") {
       const filledOptions = Object.values(questionForm.options).filter((o) => o.trim());
       if (filledOptions.length < 2) {
-        alert("Please provide at least 2 answer options");
+        setQuestionFormError("Please provide at least 2 answer options");
         return;
       }
     }
+
+    setQuestionFormError(null);
 
     const newQuestion: Question = {
       id: Date.now().toString(),
@@ -217,7 +220,10 @@ export default function CreateQuizPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowQuestionForm(true)}
+                    onClick={() => {
+                      setQuestionFormError(null);
+                      setShowQuestionForm(true);
+                    }}
                     className="gap-2"
                   >
                     <Plus className="size-4" />
@@ -345,6 +351,12 @@ export default function CreateQuizPage() {
                       </div>
                     )}
 
+                    {questionFormError && (
+                      <p role="alert" className="text-sm text-destructive">
+                        {questionFormError}
+                      </p>
+                    )}
+
                     <div className="flex gap-2 pt-2">
                       <Button
                         type="button"
@@ -356,7 +368,10 @@ export default function CreateQuizPage() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setShowQuestionForm(false)}
+                        onClick={() => {
+                          setQuestionFormError(null);
+                          setShowQuestionForm(false);
+                        }}
                         className="flex-1"
                       >
                         Cancel
