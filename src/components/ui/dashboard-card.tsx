@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface DashboardCardProps
   extends Omit<React.ComponentProps<typeof Card>, "title"> {
-  title: React.ReactNode;
+  title?: React.ReactNode;
   /** Override the title's heading level (defaults to h2) when a card is nested under its own section heading. */
   titleRender?: React.ReactElement;
   action?: React.ReactNode;

@@ -168,7 +168,7 @@ export default function MaterialsPage() {
               {materials.map((material) => (
                 <DashboardCard key={material.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
                   <a
-                    href={material.file_url}
+                    href={material.file_url ?? undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 flex items-center gap-4 group"
