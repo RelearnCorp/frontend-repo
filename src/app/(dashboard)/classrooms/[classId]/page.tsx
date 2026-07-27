@@ -40,8 +40,8 @@ function LeaveClassButton({ classId }: { classId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="destructive" size="sm">Leave Class</Button>
+      <DialogTrigger render={<Button variant="destructive" size="sm" />}>
+        Leave Class
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
