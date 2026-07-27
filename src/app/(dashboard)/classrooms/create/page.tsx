@@ -102,7 +102,9 @@ export default function CreateClassPage() {
                 </Field>
 
                 <Field data-invalid={!!fieldErrors.description}>
-                  <FieldLabel htmlFor="description" optional>Description</FieldLabel>
+                  <FieldLabel htmlFor="description">
+                    Description <span className="font-normal text-muted-foreground">(optional)</span>
+                  </FieldLabel>
                   <Input
                     id="description"
                     value={formData.description}

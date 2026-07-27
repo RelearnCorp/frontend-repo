@@ -1,15 +1,71 @@
-/* eslint-disable react-hooks/immutability */
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, LoaderCircle } from "lucide-react";
-import { quizzesApi } from "@/services/api";
+import { ArrowLeft, AlertCircle, Lightbulb, LoaderCircle } from "lucide-react";
+import { aiApi, quizzesApi } from "@/services/api";
 import { ApiError } from "@/services/http";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
-import type { ApiQuestion, QuizAnswer, AttemptStartData } from "@/types/api";
+import {
+  clearQuizAttempt,
+  loadQuizAttempt,
+  saveQuizResult,
+} from "@/lib/quiz-attempt-storage";
+import type { AttemptStartData, HintLevel, QuizAnswer } from "@/types/api";
+
+function HintPanel({ questionId }: { questionId: string }) {
+  const [level, setLevel] = useState(0);
+  const [hints, setHints] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const nextLevel = (level + 1) as 1 | 2 | 3;
+  const maxedOut = level >= 3;
+
+  const handleHint = async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      const data = await aiApi.hint({
+        question_id: questionId,
+        hint_level: String(nextLevel) as HintLevel,
+      });
+      setHints((prev) => [...prev, data.hint]);
+      setLevel(nextLevel);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't get a hint.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2 pt-4 border-t">
+      {hints.map((hint, i) => (
+        <div
+          key={i}
+          className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+        >
+          <span className="font-bold">Hint {i + 1}:</span> {hint}
+        </div>
+      ))}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="gap-1.5"
+        disabled={isLoading || maxedOut}
+        onClick={handleHint}
+      >
+        {isLoading ? <LoaderCircle className="animate-spin" /> : <Lightbulb />}
+        {maxedOut ? "No more hints" : `Get Hint (${nextLevel}/3)`}
+      </Button>
+    </div>
+  );
+}
 
 export default function QuizAttemptPage() {
   const params = useParams();
@@ -19,64 +75,50 @@ export default function QuizAttemptPage() {
   const attemptId = params.attemptId as string;
 
   const [attempt, setAttempt] = useState<AttemptStartData | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
 
   useEffect(() => {
-    loadAttempt();
-  }, [attemptId]);
-
-  const loadAttempt = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      // Note: We would fetch attempt details when the backend endpoint is available
-      // For now using placeholder
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
+    const stored = loadQuizAttempt(attemptId);
+    // Deferred a tick so this transition happens in a promise callback
+    // rather than synchronously in the effect body.
+    Promise.resolve().then(() => {
+      if (stored) {
+        setAttempt(stored);
       } else {
-        setError("Failed to load quiz");
+        setNotFound(true);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+  }, [attemptId]);
 
   const handleAnswerChange = (questionId: string, answer: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: answer }));
   };
 
   const handleSubmitQuiz = async () => {
+    if (!attempt) return;
+    setSubmitError(null);
     setSubmitting(true);
     try {
-      const quizAnswers: QuizAnswer[] = attempt?.questions.map((q) => ({
-        question_id: q.id || "",
-        student_answer: answers[q.id || ""] || "",
-      })) || [];
+      const quizAnswers: QuizAnswer[] = attempt.questions.map((q) => ({
+        question_id: q.id,
+        student_answer: answers[q.id] ?? "",
+      }));
 
       const result = await quizzesApi.submitAttempt(attemptId, quizAnswers);
-      router.push(`/classrooms/${classId}/quizzes/${quizId}/results/${result.attempt_id}`);
+      saveQuizResult(result.attempt_id, result);
+      clearQuizAttempt(attemptId);
+      router.push(`/classrooms/${classId}/quizzes/${quizId}/result/${result.attempt_id}`);
     } catch (err) {
-      alert("Failed to submit quiz");
+      setSubmitError(err instanceof ApiError ? err.message : "Failed to submit quiz");
       setSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-w-0 flex-1 flex flex-col">
-        <div className="flex items-center justify-center py-12">
-          <div className="text-sm text-muted-foreground">Loading quiz...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !attempt) {
+  if (notFound) {
     return (
       <div className="min-w-0 flex-1 flex flex-col">
         <div className="border-b border-border px-6 py-4 lg:px-8">
@@ -89,9 +131,23 @@ export default function QuizAttemptPage() {
           <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 max-w-md">
             <div className="flex items-start gap-3">
               <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-              <p className="text-sm text-destructive">{error || "Quiz not found"}</p>
+              <p className="text-sm text-destructive">
+                This quiz session isn&apos;t available anymore — it looks
+                like the page was reloaded or opened directly. Go back and
+                start the quiz again.
+              </p>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!attempt) {
+    return (
+      <div className="min-w-0 flex-1 flex flex-col">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-sm text-muted-foreground">Loading quiz…</div>
         </div>
       </div>
     );
@@ -123,12 +179,8 @@ export default function QuizAttemptPage() {
       <main className="flex-1 overflow-y-auto p-6 lg:p-8">
         <div className="max-w-2xl mx-auto">
           {currentQuestion && (
-            <DashboardCard>
+            <DashboardCard title={currentQuestion.question_text ?? currentQuestion.content}>
               <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold">{currentQuestion.question_text || currentQuestion.content}</h2>
-                </div>
-
                 <div className="space-y-3">
                   {currentQuestion.question_type === "multiple_choice" && currentQuestion.options && (
                     <>
@@ -138,8 +190,8 @@ export default function QuizAttemptPage() {
                             type="radio"
                             name={`question-${currentQuestion.id}`}
                             value={key}
-                            checked={answers[currentQuestion.id || ""] === key}
-                            onChange={() => handleAnswerChange(currentQuestion.id || "", key)}
+                            checked={answers[currentQuestion.id] === key}
+                            onChange={() => handleAnswerChange(currentQuestion.id, key)}
                             className="cursor-pointer"
                           />
                           <span className="font-medium">{value}</span>
@@ -150,13 +202,17 @@ export default function QuizAttemptPage() {
 
                   {(currentQuestion.question_type === "short_answer" || currentQuestion.question_type === "essay") && (
                     <textarea
-                      value={answers[currentQuestion.id || ""] || ""}
-                      onChange={(e) => handleAnswerChange(currentQuestion.id || "", e.target.value)}
+                      value={answers[currentQuestion.id] ?? ""}
+                      onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
                       placeholder={currentQuestion.question_type === "essay" ? "Write your essay here..." : "Enter your answer..."}
                       className="w-full rounded border border-input bg-background px-3 py-2 text-sm min-h-32"
                     />
                   )}
                 </div>
+
+                <HintPanel questionId={currentQuestion.id} />
+
+                {submitError && <p className="text-sm text-destructive">{submitError}</p>}
 
                 {/* Navigation Buttons */}
                 <div className="flex gap-3 pt-6 border-t">

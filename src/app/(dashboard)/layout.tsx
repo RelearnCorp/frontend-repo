@@ -1,4 +1,5 @@
 import { AuthGuard } from "@/components/app/auth-guard";
+import { DashboardShell } from "@/components/app/dashboard-shell";
 
 export default function DashboardLayout({
   children,
@@ -7,7 +8,7 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <div className="flex min-h-dvh bg-muted/40">{children}</div>
+      <DashboardShell>{children}</DashboardShell>
     </AuthGuard>
   );
 }
