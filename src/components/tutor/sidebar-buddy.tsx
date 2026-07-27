@@ -23,7 +23,7 @@ export const SidebarBuddy: React.FC<SidebarBuddyProps> = ({
         </div>
 
         <p className="italic text-gray-300 leading-relaxed my-2">
-          "{hint}"
+          {hint}
         </p>
 
         <button 

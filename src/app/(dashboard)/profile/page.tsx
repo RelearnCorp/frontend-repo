@@ -27,18 +27,18 @@ export const metadata: Metadata = {
 
 const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
-    label: "Menu",
+    label: "Learning",
     items: [
-      { label: "Dashboard", href: "#dashboard", icon: "home", disabled: true },
-      { label: "Courses", href: "#courses", icon: "courses", disabled: true },
-      { label: "Assignments", href: "#assignments", icon: "assignments", disabled: true },
+      { label: "Classroom", href: "/classrooms", icon: "courses" },
+      { label: "Analytics", href: "/analytics", icon: "analytics" },
+      { label: "Profile", href: "/profile", icon: "profile", active: true },
     ],
   },
   {
-    label: "Personal",
+    label: "Resources",
     items: [
-      { label: "Profile", href: "/profile", icon: "profile", active: true },
-      { label: "Settings", href: "#settings", icon: "settings", disabled: true },
+      { label: "AI Tutor", href: "/tutor", icon: "ai-tutor" },
+      { label: "Settings", href: "#settings", icon: "settings"},
     ],
   },
 ];

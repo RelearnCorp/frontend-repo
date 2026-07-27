@@ -19,15 +19,14 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
     label: "Management",
     items: [
-      { label: "Overview", href: "#overview", icon: "overview", disabled: true },
+      { label: "Classrooms", href: "/classrooms", icon: "courses" },
       {
         label: "Teacher Intelligence",
         href: "/teacher",
         icon: "intelligence",
         active: true,
       },
-      { label: "Student Roster", href: "#roster", icon: "roster", disabled: true },
-      { label: "Curriculum", href: "#curriculum", icon: "curriculum", disabled: true },
+      { label: "Analytics", href: "/analytics", icon: "analytics" },
     ],
   },
   {
