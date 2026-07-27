@@ -3,18 +3,68 @@
 import { useEffect, useState,useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Copy, Users, AlertCircle, FileText, HelpCircle } from "lucide-react";
+import { ArrowLeft, Copy, LoaderCircle, Users, FileText, HelpCircle } from "lucide-react";
 import { classesApi } from "@/services/api";
 import { ApiError } from "@/services/http";
 import { useAuth } from "@/hooks/use-auth";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type { ClassDetailData } from "@/types/api";
 
+function LeaveClassButton({ classId }: { classId: string }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  const handleLeave = async () => {
+    setError(null);
+    setIsLeaving(true);
+    try {
+      await classesApi.leave(classId);
+      router.push("/classrooms");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to leave class");
+      setIsLeaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="destructive" />}>
+        Leave Class
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Leave this class?</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          You&apos;ll lose access to its materials and quizzes unless you
+          rejoin with the class code.
+        </p>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <DialogFooter>
+          <Button variant="destructive" onClick={handleLeave} disabled={isLeaving}>
+            {isLeaving && <LoaderCircle className="animate-spin" />}
+            Leave Class
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function ClassDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { user } = useAuth();
   const classId = params.classId as string;
 
@@ -68,16 +118,6 @@ export default function ClassDetailPage() {
     }
   };
 
-  const handleLeaveClass = async () => {
-    if (!confirm("Are you sure you want to leave this class?")) return;
-    try {
-      await classesApi.leave(classId);
-      router.push("/classrooms");
-    } catch {
-      alert("Failed to leave class");
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-w-0 flex-1 flex flex-col">
@@ -98,12 +138,7 @@ export default function ClassDetailPage() {
           </Link>
         </div>
         <div className="flex items-center justify-center py-12">
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 max-w-md">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-              <p className="text-sm text-destructive">{error || "Class not found"}</p>
-            </div>
-          </div>
+          <Alert className="max-w-md">{error || "Class not found"}</Alert>
         </div>
       </div>
     );
@@ -169,14 +204,7 @@ export default function ClassDetailPage() {
                 Quizzes
               </Button>
             </Link>
-            {!isTeacher && (
-              <Button
-                variant="destructive"
-                onClick={handleLeaveClass}
-              >
-                Leave Class
-              </Button>
-            )}
+            {!isTeacher && <LeaveClassButton classId={classId} />}
           </div>
 
           {/* Students List (for teachers) */}

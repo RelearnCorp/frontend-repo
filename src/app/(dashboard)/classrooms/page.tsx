@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Users, BookOpen, AlertCircle } from "lucide-react";
+import { Plus, Users, BookOpen } from "lucide-react";
 import { classesApi } from "@/services/api";
 import { ApiError } from "@/services/http";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { useAuth } from "@/hooks/use-auth";
@@ -71,14 +72,7 @@ export default function ClassroomsPage() {
           </div>
         )}
 
-        {error && (
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          </div>
-        )}
+        {error && <Alert>{error}</Alert>}
 
         {!loading && !error && classes.length === 0 && (
           <div className="rounded-lg border border-dashed p-12 text-center">

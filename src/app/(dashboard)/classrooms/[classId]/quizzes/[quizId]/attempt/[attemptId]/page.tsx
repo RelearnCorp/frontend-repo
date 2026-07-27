@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, Lightbulb, LoaderCircle } from "lucide-react";
+import { ArrowLeft, Lightbulb, LoaderCircle } from "lucide-react";
 import { aiApi, quizzesApi } from "@/services/api";
 import { ApiError } from "@/services/http";
+import { AuthGuard } from "@/components/app/auth-guard";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import {
@@ -67,7 +69,7 @@ function HintPanel({ questionId }: { questionId: string }) {
   );
 }
 
-export default function QuizAttemptPage() {
+function QuizAttemptContent() {
   const params = useParams();
   const router = useRouter();
   const classId = params.classId as string;
@@ -128,16 +130,11 @@ export default function QuizAttemptPage() {
           </Link>
         </div>
         <div className="flex items-center justify-center py-12">
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 max-w-md">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-              <p className="text-sm text-destructive">
-                This quiz session isn&apos;t available anymore — it looks
-                like the page was reloaded or opened directly. Go back and
-                start the quiz again.
-              </p>
-            </div>
-          </div>
+          <Alert className="max-w-md">
+            This quiz session isn&apos;t available anymore — it looks like
+            the page was reloaded or opened directly. Go back and start the
+            quiz again.
+          </Alert>
         </div>
       </div>
     );
@@ -248,5 +245,13 @@ export default function QuizAttemptPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function QuizAttemptPage() {
+  return (
+    <AuthGuard role="student">
+      <QuizAttemptContent />
+    </AuthGuard>
   );
 }
