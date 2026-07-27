@@ -4,10 +4,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload, FileText, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload, FileText } from "lucide-react";
 import { materialsApi } from "@/services/api";
 import { ApiError } from "@/services/http";
 import { useAuth } from "@/hooks/use-auth";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import type { ApiMaterial } from "@/types/api";
@@ -129,23 +130,9 @@ export default function MaterialsPage() {
             />
           </div>
 
-          {uploadError && (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">{uploadError}</p>
-              </div>
-            </div>
-          )}
+          {uploadError && <Alert>{uploadError}</Alert>}
 
-          {error && (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
-            </div>
-          )}
+          {error && <Alert>{error}</Alert>}
 
           {loading && (
             <div className="flex items-center justify-center py-12">

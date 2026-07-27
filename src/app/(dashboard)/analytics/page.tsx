@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { analyticsApi } from "@/services/api";
 import { ApiError } from "@/services/http";
 import { useAuth } from "@/hooks/use-auth";
-import { AlertCircle, TrendingUp, Users, CheckCircle, Zap } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, Zap } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import type { DashboardData, ProgressData } from "@/types/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -61,14 +62,7 @@ export default function AnalyticsPage() {
 
       <main className="flex-1 overflow-y-auto p-6 lg:p-8">
         <div className="max-w-6xl mx-auto space-y-6">
-          {error && (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
-            </div>
-          )}
+          {error && <Alert>{error}</Alert>}
 
           {loading && (
             <div className="flex items-center justify-center py-12">
