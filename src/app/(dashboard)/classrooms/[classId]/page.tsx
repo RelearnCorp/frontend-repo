@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState,useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Copy, LoaderCircle, Users, FileText, HelpCircle } from "lucide-react";
@@ -107,9 +107,8 @@ export default function ClassDetailPage() {
     Promise.resolve().then(() => loadClassDetail());
   }, [loadClassDetail]);
 
-  const isTeacher =
-    user?.role?.name === "teacher" &&
-    user?.id === classData?.teacher_id;
+  const isTeacher = user?.role?.name === "teacher" && user?.id === classData?.teacher_id;
+
   const copyClassCode = () => {
     if (classData?.class_code) {
       navigator.clipboard.writeText(classData.class_code);
