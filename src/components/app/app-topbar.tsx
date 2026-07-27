@@ -7,7 +7,7 @@ export function AppTopbar({
   children,
 }: {
   title: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   return (
