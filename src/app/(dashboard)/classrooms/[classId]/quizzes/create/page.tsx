@@ -219,7 +219,7 @@ export default function CreateQuizPage() {
               <CardContent className="space-y-4">
                 {questions.length === 0 && !showQuestionForm && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No questions added yet. Click "Add Question" to get started.
+                    No questions added yet. Click Add Question to get started.
                   </p>
                 )}
 

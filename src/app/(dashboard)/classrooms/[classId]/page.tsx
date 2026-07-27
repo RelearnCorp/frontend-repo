@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState,useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Copy, Users, AlertCircle, FileText, HelpCircle } from "lucide-react";
@@ -10,7 +10,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import type { ClassDetailData } from "@/types/api";
-
 
 export default function ClassDetailPage() {
   const params = useParams();
@@ -27,42 +26,36 @@ export default function ClassDetailPage() {
     loadClassDetail();
   }, [classId]);
 
-// eslint-disable-next-line react-hooks/preserve-manual-memoization
-const loadClassDetail = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+const loadClassDetail = async () => {
+  try {
+    setLoading(true);
+    setError(null);
 
-      const data = await classesApi.detail(classId);
+    const data = await classesApi.detail(classId);
 
-      if (!data) {
-        setError("Class data not found");
-        return;
-      }
-
-      setClassData(data);
-    } catch (err) {
-      console.error("Failed to load class detail:", err);
-
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Failed to load class details");
-      }
-    } finally {
-      setLoading(false);
+    if (!data) {
+      setError("Class data not found");
+      return;
     }
-  }, [classId]);
 
-  useEffect(() => {
-    loadClassDetail();
-  }, [loadClassDetail]);
+    setClassData(data);
+  } catch (err) {
+    console.error("Failed to load class detail:", err);
 
-  const isTeacher =
-    user?.role?.name === "teacher" &&
-    user?.id === classData?.teacher_id;
+    if (err instanceof ApiError) {
+      setError(err.message);
+    } else if (err instanceof Error) {
+      setError(err.message);
+    } else {
+      setError("Failed to load class details");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const isTeacher = user?.role?.name === "teacher" && user?.id === classData?.teacher_id;
+
   const copyClassCode = () => {
     if (classData?.class_code) {
       navigator.clipboard.writeText(classData.class_code);

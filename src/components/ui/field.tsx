@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 
+
+
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   return (
     <fieldset
@@ -98,10 +100,16 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+interface FieldLabelProps extends React.ComponentProps<typeof Label> {
+  optional?: boolean;
+}
+
 function FieldLabel({
   className,
+  optional = false,
+  children,
   ...props
-}: React.ComponentProps<typeof Label>) {
+}: FieldLabelProps) {
   return (
     <Label
       data-slot="field-label"
@@ -111,8 +119,15 @@ function FieldLabel({
         className
       )}
       {...props}
-    />
-  )
+    >
+      {children}
+      {optional && (
+        <span className="text-sm font-normal text-muted-foreground">
+          (Optional)
+        </span>
+      )}
+    </Label>
+  );
 }
 
 function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {

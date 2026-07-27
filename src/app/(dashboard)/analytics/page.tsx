@@ -77,7 +77,9 @@ export default function AnalyticsPage() {
             <>
               {/* Overview Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <DashboardCard>
+                <DashboardCard
+                   title="this is analytics "
+                  description="Teacher can view the analytics of their class here">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Total Classes</p>
@@ -92,9 +94,17 @@ export default function AnalyticsPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">Avg Score</p>
                       <p className="text-3xl font-bold mt-2">
-                        {dashboardData.statistics
-                          ?.reduce((sum, s) => sum + (typeof s.statistics.average_score === "number" ? s.statistics.average_score : 0), 0) / Math.max(dashboardData.statistics?.length || 1, 1)
-                          .toFixed(1)}
+                        {(
+                          (dashboardData.statistics?.reduce(
+                            (sum, s) =>
+                              sum +
+                              (typeof s.statistics.average_score === "number"
+                                ? s.statistics.average_score
+                                : 0),
+                            0
+                          ) ?? 0) /
+                          Math.max(dashboardData.statistics?.length ?? 0, 1)
+                        ).toFixed(1)}
                         %
                       </p>
                     </div>
