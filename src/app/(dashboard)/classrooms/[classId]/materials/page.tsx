@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload, FileText, AlertCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Upload, FileText, AlertCircle } from "lucide-react";
 import { materialsApi } from "@/services/api";
 import { ApiError } from "@/services/http";
 import { useAuth } from "@/hooks/use-auth";
@@ -166,32 +166,23 @@ export default function MaterialsPage() {
           {!loading && materials.length > 0 && (
             <div className="space-y-3">
               {materials.map((material) => (
-                <DashboardCard key={material.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-                  <a
-                    href={material.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center gap-4 group"
-                  >
-                    <div className="text-2xl">{getFileIcon(material.file_type)}</div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium group-hover:text-primary transition-colors truncate">
-                        {material.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(material.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </a>
-                  {isTeacher && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => alert("Delete functionality coming soon")}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                <DashboardCard
+                  key={material.id}
+                  title={material.title}
+                  titleRender={<h3 className="truncate" />}
+                  description={new Date(material.created_at).toLocaleDateString()}
+                  action={<span className="text-2xl">{getFileIcon(material.file_type)}</span>}
+                  className="p-4 hover:bg-muted/50 transition-colors"
+                >
+                  {material.file_url && (
+                    <a
+                      href={material.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-primary hover:underline"
                     >
-                      <Trash2 className="size-4" />
-                    </Button>
+                      Open material
+                    </a>
                   )}
                 </DashboardCard>
               ))}

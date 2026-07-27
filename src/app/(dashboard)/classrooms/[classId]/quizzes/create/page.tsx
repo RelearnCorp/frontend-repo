@@ -176,7 +176,9 @@ export default function CreateQuizPage() {
                   </Field>
 
                   <Field data-invalid={!!fieldErrors.description}>
-                    <FieldLabel htmlFor="description" optional>Description</FieldLabel>
+                    <FieldLabel htmlFor="description">
+                      Description <span className="font-normal text-muted-foreground">(optional)</span>
+                    </FieldLabel>
                     <Input
                       id="description"
                       value={formData.description}
@@ -219,7 +221,7 @@ export default function CreateQuizPage() {
               <CardContent className="space-y-4">
                 {questions.length === 0 && !showQuestionForm && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No questions added yet. Click "Add Question" to get started.
+                    No questions added yet. Click &ldquo;Add Question&rdquo; to get started.
                   </p>
                 )}
 

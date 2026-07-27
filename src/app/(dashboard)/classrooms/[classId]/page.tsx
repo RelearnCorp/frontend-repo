@@ -23,12 +23,7 @@ export default function ClassDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    loadClassDetail();
-  }, [classId]);
-
-// eslint-disable-next-line react-hooks/preserve-manual-memoization
-const loadClassDetail = useCallback(async () => {
+  const loadClassDetail = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -57,7 +52,9 @@ const loadClassDetail = useCallback(async () => {
   }, [classId]);
 
   useEffect(() => {
-    loadClassDetail();
+    // Deferred a tick so the state updates inside loadClassDetail() happen in
+    // a promise callback rather than synchronously in the effect body.
+    Promise.resolve().then(() => loadClassDetail());
   }, [loadClassDetail]);
 
   const isTeacher =
@@ -76,7 +73,7 @@ const loadClassDetail = useCallback(async () => {
     try {
       await classesApi.leave(classId);
       router.push("/classrooms");
-    } catch (err) {
+    } catch {
       alert("Failed to leave class");
     }
   };
@@ -138,27 +135,22 @@ const loadClassDetail = useCallback(async () => {
 
           {/* Class Code Card (for teachers) */}
           {isTeacher && (
-            <DashboardCard>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold">Class Code</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Share this code with students to let them join
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <code className="bg-muted px-3 py-2 rounded font-mono font-bold text-lg">
-                    {classData.class_code}
-                  </code>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={copyClassCode}
-                    title={copied ? "Copied!" : "Copy code"}
-                  >
-                    <Copy className="size-4" />
-                  </Button>
-                </div>
+            <DashboardCard
+              title="Class Code"
+              description="Share this code with students to let them join"
+            >
+              <div className="flex items-center gap-2">
+                <code className="bg-muted px-3 py-2 rounded font-mono font-bold text-lg">
+                  {classData.class_code}
+                </code>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={copyClassCode}
+                  title={copied ? "Copied!" : "Copy code"}
+                >
+                  <Copy className="size-4" />
+                </Button>
               </div>
             </DashboardCard>
           )}
@@ -189,33 +181,27 @@ const loadClassDetail = useCallback(async () => {
 
           {/* Students List (for teachers) */}
           {isTeacher && (
-            <DashboardCard>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Users className="size-5" />
-                    <h3 className="font-semibold">Students ({classData.students.length})</h3>
-                  </div>
-                </div>
-
-                {classData.students.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No students enrolled yet</p>
-                ) : (
-                  <div className="space-y-2">
-                    {classData.students.map((student) => (
-                      <div key={student.id} className="flex items-center justify-between p-3 rounded border border-border hover:bg-muted/50 transition-colors">
-                        <div>
-                          <p className="font-medium text-sm">{student.full_name}</p>
-                          <p className="text-xs text-muted-foreground">{student.email}</p>
-                        </div>
-                        <span className="text-xs bg-muted px-2 py-1 rounded">
-                          {student.role?.name || "student"}
-                        </span>
+            <DashboardCard
+              title={`Students (${classData.students.length})`}
+              action={<Users className="size-5 text-muted-foreground" />}
+            >
+              {classData.students.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No students enrolled yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {classData.students.map((student) => (
+                    <div key={student.id} className="flex items-center justify-between p-3 rounded border border-border hover:bg-muted/50 transition-colors">
+                      <div>
+                        <p className="font-medium text-sm">{student.full_name}</p>
+                        <p className="text-xs text-muted-foreground">{student.email}</p>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <span className="text-xs bg-muted px-2 py-1 rounded">
+                        {student.role?.name || "student"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </DashboardCard>
           )}
         </div>

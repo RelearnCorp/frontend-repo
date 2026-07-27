@@ -16,10 +16,6 @@ export default function ClassroomsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadClasses();
-  }, []);
-
   const loadClasses = async () => {
     try {
       setLoading(true);
@@ -36,6 +32,12 @@ export default function ClassroomsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Deferred a tick so the state updates inside loadClasses() happen in a
+    // promise callback rather than synchronously in the effect body.
+    Promise.resolve().then(() => loadClasses());
+  }, []);
 
   const isTeacher = user?.role?.name === "teacher";
 
@@ -98,27 +100,26 @@ export default function ClassroomsPage() {
                 href={`/classrooms/${cls.id}`}
                 className="group"
               >
-                <DashboardCard className="h-full transition-all hover:shadow-lg hover:border-primary/50">
-                  <div className="space-y-3">
-                    <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-                      {cls.name}
-                    </h3>
-                    {cls.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {cls.description}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Users className="size-4" />
-                        <span>{cls.student_count || 0} students</span>
-                      </div>
-                      {cls.teacher && (
-                        <span className="text-xs bg-muted px-2 py-1 rounded">
-                          {cls.teacher.full_name}
-                        </span>
-                      )}
+                <DashboardCard
+                  title={cls.name}
+                  titleRender={<h3 className="line-clamp-2 group-hover:text-primary transition-colors" />}
+                  description={
+                    cls.description ? (
+                      <span className="line-clamp-2">{cls.description}</span>
+                    ) : undefined
+                  }
+                  className="h-full transition-all hover:shadow-lg hover:border-primary/50"
+                >
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Users className="size-4" />
+                      <span>{cls.student_count || 0} students</span>
                     </div>
+                    {cls.teacher && (
+                      <span className="text-xs bg-muted px-2 py-1 rounded">
+                        {cls.teacher.full_name}
+                      </span>
+                    )}
                   </div>
                 </DashboardCard>
               </Link>
