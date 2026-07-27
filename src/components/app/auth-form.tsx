@@ -18,7 +18,6 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiError } from "@/services/http";
-import type { ApiUser } from "@/types/api";
 
 type Mode = "login" | "register";
 
@@ -34,10 +33,6 @@ const registerSchema = z.object({
 });
 
 type FieldErrors = Partial<Record<"fullName" | "email" | "password", string[]>>;
-
-function homeFor(user: ApiUser) {
-  return user.role?.name === "teacher" ? "/teacher" : "/profile";
-}
 
 export function AuthForm() {
   const router = useRouter();
@@ -69,10 +64,12 @@ export function AuthForm() {
 
     setIsSubmitting(true);
     try {
-      const user = isLogin
-        ? await login(email, password)
-        : await register(email, password, fullName);
-      router.push(homeFor(user));
+      if (isLogin) {
+        await login(email, password);
+      } else {
+        await register(email, password, fullName);
+      }
+      router.push("/classrooms");
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

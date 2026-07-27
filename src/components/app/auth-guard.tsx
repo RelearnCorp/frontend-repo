@@ -31,7 +31,7 @@ export function AuthGuard({
       const allowed = Array.isArray(role) ? role : [role];
       const currentRole = tokenStore.getUser()?.role?.name;
       if (!currentRole || !allowed.includes(currentRole)) {
-        router.replace("/classes");
+        router.replace("/classrooms");
         return;
       }
     }
