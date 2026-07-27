@@ -2,8 +2,6 @@
 
 import { useCallback } from "react";
 import { AppTopbar } from "@/components/app/app-topbar";
-import { NotificationButton } from "@/components/app/notification-button";
-import { Button } from "@/components/ui/button";
 import { classesApi } from "@/services/api";
 import { useLiveData } from "@/hooks/use-live-data";
 
@@ -18,7 +16,7 @@ export function TeacherTopbarLive() {
 
   return (
     <AppTopbar
-      title="Teacher Intelligence Dashboard"
+      title="Teacher Overview"
       subtitle={
         status === "loading"
           ? "Loading classes..."
@@ -26,11 +24,6 @@ export function TeacherTopbarLive() {
             ? "Couldn't load classes — showing defaults"
             : subtitle
       }
-    >
-      <NotificationButton />
-      <Button className="font-semibold" disabled title="Coming soon">
-        Generate Weekly Report
-      </Button>
-    </AppTopbar>
+    />
   );
 }

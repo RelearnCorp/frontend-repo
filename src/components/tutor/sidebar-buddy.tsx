@@ -1,73 +1,145 @@
-import React from 'react';
+"use client";
 
-interface SidebarBuddyProps {
-  hint?: string;
-  onNudgeClick?: () => void;
+import { useCallback } from "react";
+import { FileText, Image as ImageIcon, LoaderCircle, Video } from "lucide-react";
+
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Eyebrow, Muted } from "@/components/ui/typography";
+import { InteractiveChart } from "@/components/tutor/interactive-chart";
+import { useApiData } from "@/hooks/use-api-data";
+import { materialsApi } from "@/services/api";
+import type { ApiClass, MaterialFileType } from "@/types/api";
+
+function iconFor(type: MaterialFileType) {
+  switch (type) {
+    case "image":
+      return ImageIcon;
+    case "video":
+      return Video;
+    default:
+      return FileText;
+  }
 }
 
-export const SidebarBuddy: React.FC<SidebarBuddyProps> = ({
-  hint = "Think about the relationship between velocity and mass. If the mass doubles but the velocity stays the same, what happens to the total energy?",
-  onNudgeClick
-}) => {
+function MaterialsList({ classId }: { classId: string }) {
+  const fetcher = useCallback(() => materialsApi.list(classId), [classId]);
+  const { data, status } = useApiData(fetcher);
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center gap-2 py-6 text-xs text-muted-foreground">
+        <LoaderCircle className="size-4 animate-spin" />
+        Loading materials…
+      </div>
+    );
+  }
+
+  if (!data || data.materials.length === 0) {
+    return <Muted className="text-xs">No materials in this class yet.</Muted>;
+  }
+
   return (
-    <aside className="w-80 border-r border-gray-800 bg-[#121214] p-4 text-gray-300 flex flex-col gap-6 text-xs shrink-0">
-      {/* Hint Buddy Box */}
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 relative">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5 font-semibold text-amber-400 uppercase tracking-wider text-[10px]">
-            <span>💡</span> HINT BUDDY
+    <div className="space-y-2">
+      {data.materials.slice(0, 4).map((material) => {
+        const Icon = iconFor(material.file_type);
+        const content = (
+          <Card size="sm" className="gap-0.5 transition-colors hover:bg-sidebar-accent/40">
+            <CardHeader className="flex-row items-center gap-2.5">
+              <Icon className="size-3.5 shrink-0 text-muted-foreground" />
+              <CardTitle className="truncate text-xs font-semibold" render={<h3 />}>
+                {material.title}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        );
+        return material.file_url ? (
+          <a
+            key={material.id}
+            href={material.file_url}
+            target="_blank"
+            rel="noreferrer"
+            className="block rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            {content}
+          </a>
+        ) : (
+          <div key={material.id}>{content}</div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function SidebarBuddy({
+  classes,
+  classesLoading,
+  selectedClassId,
+  onSelectClass,
+}: {
+  classes: ApiClass[];
+  classesLoading: boolean;
+  selectedClassId: string | null;
+  onSelectClass: (classId: string) => void;
+}) {
+  return (
+    <aside className="hidden w-[320px] shrink-0 flex-col gap-7 overflow-y-auto border-r bg-background p-5 xl:flex">
+      <section>
+        <Eyebrow render={<h2 />} className="pb-3 text-xs text-foreground">
+          Studying
+        </Eyebrow>
+        {classesLoading ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <LoaderCircle className="size-4 animate-spin" />
+            Loading classes…
           </div>
-          <span className="rounded bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 text-[9px] text-amber-300">
-            Nudge Ready
-          </span>
-        </div>
+        ) : classes.length === 0 ? (
+          <Muted className="text-xs leading-relaxed">
+            Join a class to get materials and score history alongside your
+            chat.
+          </Muted>
+        ) : (
+          <Select
+            value={selectedClassId ?? undefined}
+            onValueChange={(v) => onSelectClass(v as string)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Choose a class" />
+            </SelectTrigger>
+            <SelectContent>
+              {classes.map((cls) => (
+                <SelectItem key={cls.id} value={cls.id}>
+                  {cls.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </section>
 
-        <p className="italic text-gray-300 leading-relaxed my-2">
-          {hint}
-        </p>
+      {selectedClassId && (
+        <>
+          <section>
+            <Eyebrow render={<h2 />} className="pb-3 text-xs text-foreground">
+              Materials
+            </Eyebrow>
+            <MaterialsList classId={selectedClassId} />
+          </section>
 
-        <button 
-          onClick={onNudgeClick}
-          className="text-amber-400 hover:text-amber-300 text-[11px] font-medium flex items-center gap-1 mt-3 transition-colors"
-        >
-          Tell me more &rsaquo;
-        </button>
-      </div>
-
-      {/* Quick Review Section */}
-      <div>
-        <div className="flex items-center justify-between mb-3 text-gray-400 uppercase tracking-wider text-[10px] font-semibold">
-          <span>📋 QUICK REVIEW</span>
-          <span className="text-gray-500">4 Cards</span>
-        </div>
-
-        <div className="space-y-2">
-          <div className="rounded-lg border border-gray-800 bg-[#18181b] p-3">
-            <h4 className="font-semibold text-gray-200 text-xs">Work-Energy Principle</h4>
-            <p className="text-gray-400 text-[11px] mt-1 leading-snug">
-              The net work done on an object equals its change in KE.
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-gray-800/60 bg-[#18181b]/50 p-3 opacity-70">
-            <h4 className="font-semibold text-gray-300 text-xs">Conservative Forces</h4>
-            <p className="text-gray-500 text-[11px] mt-1 leading-snug">
-              Forces where total work done is independent of path.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Mini Map Placeholder */}
-      <div className="mt-auto">
-        <div className="flex items-center justify-between mb-2 text-gray-400 uppercase tracking-wider text-[10px] font-semibold">
-          <span className="flex items-center gap-1">📍 MINI MAP</span>
-          <span className="text-gray-500 cursor-pointer hover:text-gray-300">⤢</span>
-        </div>
-        <div className="h-28 rounded-lg border border-gray-800 bg-[#18181b] flex items-center justify-center text-gray-600 text-[10px]">
-          Concept Tree Preview
-        </div>
-      </div>
+          <section>
+            <Eyebrow render={<h2 />} className="pb-3 text-xs text-foreground">
+              Your Recent Scores
+            </Eyebrow>
+            <InteractiveChart classId={selectedClassId} />
+          </section>
+        </>
+      )}
     </aside>
   );
-};
+}

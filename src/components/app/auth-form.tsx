@@ -134,20 +134,7 @@ export function AuthForm() {
               <FieldError errors={fieldErrors.email?.map((message) => ({ message }))} />
             </Field>
             <Field data-invalid={!!fieldErrors.password}>
-              <div className="flex items-center justify-between">
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                {isLogin && (
-                  <Button
-                    variant="link"
-                    size="sm"
-                    disabled
-                    title="Password reset is coming soon"
-                    className="h-auto p-0 text-xs text-muted-foreground disabled:opacity-60"
-                  >
-                    Forgot password?
-                  </Button>
-                )}
-              </div>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
               <Input
                 id="password"
                 type="password"

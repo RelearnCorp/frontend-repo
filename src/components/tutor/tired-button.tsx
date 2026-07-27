@@ -1,32 +1,42 @@
-import React from 'react';
+"use client";
 
-interface TiredButtonProps {
-  mode: 'socratic' | 'explainable';
+import { ToggleLeft } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+export function TiredButton({
+  active,
+  onClick,
+}: {
+  /** Whether the tutor is currently asked to give direct, step-by-step answers. */
+  active: boolean;
   onClick: () => void;
-}
-
-export const TiredButton: React.FC<TiredButtonProps> = ({ mode, onClick }) => {
-  const isSocratic = mode === 'socratic';
-
+}) {
   return (
-    <div className="flex justify-center my-3">
-      <button
-        type="button"
-        onClick={onClick}
-        className="group relative flex items-center gap-3 rounded-full border border-gray-700 bg-[#18181b] px-5 py-2 text-xs font-medium text-gray-200 hover:border-gray-500 hover:bg-[#202024] transition-all shadow-md active:scale-95"
-      >
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-800 text-gray-300 group-hover:bg-gray-700 text-[10px]">
-          ⚡
+    <Button
+      variant="outline"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "h-auto gap-3 rounded-full px-5 py-2.5 text-left shadow-xs",
+        active &&
+          "border-indigo-300 bg-indigo-50 hover:bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/60 dark:hover:bg-indigo-950/60",
+      )}
+    >
+      <span className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <ToggleLeft className="size-4" />
+      </span>
+      <span>
+        <span className="block text-sm font-bold">
+          {active ? "Back to concise answers" : "I'm Tired / I Give Up"}
         </span>
-        <div className="text-left">
-          <p className="leading-tight font-semibold">
-            {isSocratic ? "I'm Tired / I Give Up" : "Back to Socratic Mode"}
-          </p>
-          <p className="text-[10px] text-gray-400 leading-tight">
-            {isSocratic ? "Switch to Step-by-Step Explanation" : "Re-enable Guided Questioning"}
-          </p>
-        </div>
-      </button>
-    </div>
+        <span className="block text-xs font-normal text-muted-foreground">
+          {active
+            ? "Step-by-step explanations active"
+            : "Switch to a direct, step-by-step explanation"}
+        </span>
+      </span>
+    </Button>
   );
-};
+}
