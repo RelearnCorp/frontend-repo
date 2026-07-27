@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Users, BookOpen, AlertCircle } from "lucide-react";
+import { Plus, Users, BookOpen } from "lucide-react";
 import { classesApi } from "@/services/api";
 import { ApiError } from "@/services/http";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,10 +16,6 @@ export default function ClassroomsPage() {
   const [classes, setClasses] = useState<ApiClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadClasses();
-  }, []);
 
   const loadClasses = async () => {
     try {
@@ -36,6 +33,12 @@ export default function ClassroomsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Deferred a tick so the state updates inside loadClasses() happen in a
+    // promise callback rather than synchronously in the effect body.
+    Promise.resolve().then(() => loadClasses());
+  }, []);
 
   const isTeacher = user?.role?.name === "teacher";
 
@@ -69,14 +72,7 @@ export default function ClassroomsPage() {
           </div>
         )}
 
-        {error && (
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          </div>
-        )}
+        {error && <Alert>{error}</Alert>}
 
         {!loading && !error && classes.length === 0 && (
           <div className="rounded-lg border border-dashed p-12 text-center">
@@ -98,27 +94,26 @@ export default function ClassroomsPage() {
                 href={`/classrooms/${cls.id}`}
                 className="group"
               >
-                <DashboardCard className="h-full transition-all hover:shadow-lg hover:border-primary/50">
-                  <div className="space-y-3">
-                    <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-                      {cls.name}
-                    </h3>
-                    {cls.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {cls.description}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Users className="size-4" />
-                        <span>{cls.student_count || 0} students</span>
-                      </div>
-                      {cls.teacher && (
-                        <span className="text-xs bg-muted px-2 py-1 rounded">
-                          {cls.teacher.full_name}
-                        </span>
-                      )}
+                <DashboardCard
+                  title={cls.name}
+                  titleRender={<h3 className="line-clamp-2 group-hover:text-primary transition-colors" />}
+                  description={
+                    cls.description ? (
+                      <span className="line-clamp-2">{cls.description}</span>
+                    ) : undefined
+                  }
+                  className="h-full transition-all hover:shadow-lg hover:border-primary/50"
+                >
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Users className="size-4" />
+                      <span>{cls.student_count || 0} students</span>
                     </div>
+                    {cls.teacher && (
+                      <span className="text-xs bg-muted px-2 py-1 rounded">
+                        {cls.teacher.full_name}
+                      </span>
+                    )}
                   </div>
                 </DashboardCard>
               </Link>

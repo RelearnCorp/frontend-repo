@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { analyticsApi } from "@/services/api";
 import { ApiError } from "@/services/http";
 import { useAuth } from "@/hooks/use-auth";
-import { AlertCircle, TrendingUp, Users, CheckCircle, Zap } from "lucide-react";
+import { TrendingUp, Users, CheckCircle, Zap } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import type { DashboardData, ProgressData } from "@/types/api";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function AnalyticsPage() {
   const { user } = useAuth();
@@ -16,17 +17,13 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadAnalytics();
-  }, []);
-
   const loadAnalytics = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const isTeacher = user?.role?.name === "teacher";
-      
+
       if (isTeacher) {
         const data = await analyticsApi.dashboard();
         setDashboardData(data);
@@ -45,6 +42,13 @@ export default function AnalyticsPage() {
     }
   };
 
+  useEffect(() => {
+    // Deferred a tick so the state updates inside loadAnalytics() happen in a
+    // promise callback rather than synchronously in the effect body.
+    Promise.resolve().then(() => loadAnalytics());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const isTeacher = user?.role?.name === "teacher";
 
   return (
@@ -58,14 +62,7 @@ export default function AnalyticsPage() {
 
       <main className="flex-1 overflow-y-auto p-6 lg:p-8">
         <div className="max-w-6xl mx-auto space-y-6">
-          {error && (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
-            </div>
-          )}
+          {error && <Alert>{error}</Alert>}
 
           {loading && (
             <div className="flex items-center justify-center py-12">
@@ -78,71 +75,53 @@ export default function AnalyticsPage() {
               {/* Overview Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <DashboardCard
-                   title="this is analytics "
-                  description="Teacher can view the analytics of their class here">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Classes</p>
-                      <p className="text-3xl font-bold mt-2">{dashboardData.total_classes}</p>
-                    </div>
-                    <Users className="size-8 text-primary/50" />
-                  </div>
+                  title={<span className="text-sm text-muted-foreground">Total Classes</span>}
+                  action={<Users className="size-8 text-primary/50" />}
+                >
+                  <p className="text-3xl font-bold">{dashboardData.total_classes}</p>
                 </DashboardCard>
 
-                <DashboardCard>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Avg Score</p>
-                      <p className="text-3xl font-bold mt-2">
-                        {(
-                          (dashboardData.statistics?.reduce(
-                            (sum, s) =>
-                              sum +
-                              (typeof s.statistics.average_score === "number"
-                                ? s.statistics.average_score
-                                : 0),
-                            0
-                          ) ?? 0) /
-                          Math.max(dashboardData.statistics?.length ?? 0, 1)
-                        ).toFixed(1)}
-                        %
-                      </p>
-                    </div>
-                    <TrendingUp className="size-8 text-primary/50" />
-                  </div>
+                <DashboardCard
+                  title={<span className="text-sm text-muted-foreground">Avg Score</span>}
+                  action={<TrendingUp className="size-8 text-primary/50" />}
+                >
+                  <p className="text-3xl font-bold">
+                    {(
+                      (dashboardData.statistics?.reduce(
+                        (sum, s) =>
+                          sum +
+                          (typeof s.statistics.average_score === "number"
+                            ? s.statistics.average_score
+                            : 0),
+                        0,
+                      ) ?? 0) / Math.max(dashboardData.statistics?.length || 1, 1)
+                    ).toFixed(1)}
+                    %
+                  </p>
                 </DashboardCard>
 
-                <DashboardCard>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Quizzes Taken</p>
-                      <p className="text-3xl font-bold mt-2">
-                        {dashboardData.statistics
-                          ?.reduce((sum, s) => sum + s.statistics.total_quizzes_taken, 0)}
-                      </p>
-                    </div>
-                    <CheckCircle className="size-8 text-primary/50" />
-                  </div>
+                <DashboardCard
+                  title={<span className="text-sm text-muted-foreground">Quizzes Taken</span>}
+                  action={<CheckCircle className="size-8 text-primary/50" />}
+                >
+                  <p className="text-3xl font-bold">
+                    {dashboardData.statistics?.reduce((sum, s) => sum + s.statistics.total_quizzes_taken, 0)}
+                  </p>
                 </DashboardCard>
 
-                <DashboardCard>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total AI Uses</p>
-                      <p className="text-3xl font-bold mt-2">
-                        {dashboardData.statistics
-                          ?.reduce((sum, s) => sum + s.ai_usage.total_requests, 0)}
-                      </p>
-                    </div>
-                    <Zap className="size-8 text-primary/50" />
-                  </div>
+                <DashboardCard
+                  title={<span className="text-sm text-muted-foreground">Total AI Uses</span>}
+                  action={<Zap className="size-8 text-primary/50" />}
+                >
+                  <p className="text-3xl font-bold">
+                    {dashboardData.statistics?.reduce((sum, s) => sum + s.ai_usage.total_requests, 0)}
+                  </p>
                 </DashboardCard>
               </div>
 
               {/* Class Performance Chart */}
               {dashboardData.statistics.length > 0 && (
-                <DashboardCard>
-                  <h3 className="font-semibold mb-4">Class Performance</h3>
+                <DashboardCard title="Class Performance">
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={dashboardData.statistics}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -164,9 +143,8 @@ export default function AnalyticsPage() {
 
               {/* Per-Class Details */}
               {dashboardData.statistics.map((stat) => (
-                <DashboardCard key={stat.class_id}>
-                  <h3 className="font-semibold mb-4">{stat.class_name}</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <DashboardCard key={stat.class_id} title={stat.class_name}>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-3 bg-muted rounded">
                       <p className="text-xs text-muted-foreground">Quizzes Taken</p>
                       <p className="text-lg font-bold">{stat.statistics.total_quizzes_taken}</p>
@@ -189,6 +167,40 @@ export default function AnalyticsPage() {
                       <p className="text-lg font-bold">{stat.ai_usage.total_requests}</p>
                     </div>
                   </div>
+
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <p className="text-xs font-semibold text-muted-foreground mb-3">
+                      AI Usage Breakdown
+                    </p>
+                    {stat.ai_usage.total_requests === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        No AI activity in this class yet.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div className="p-3 bg-muted rounded">
+                          <p className="text-xs text-muted-foreground">Chat</p>
+                          <p className="text-lg font-bold">{stat.ai_usage.by_type.chat}</p>
+                        </div>
+                        <div className="p-3 bg-muted rounded">
+                          <p className="text-xs text-muted-foreground">Hints</p>
+                          <p className="text-lg font-bold">{stat.ai_usage.by_type.hint}</p>
+                        </div>
+                        <div className="p-3 bg-muted rounded">
+                          <p className="text-xs text-muted-foreground">Explanations</p>
+                          <p className="text-lg font-bold">{stat.ai_usage.by_type.explanation}</p>
+                        </div>
+                        <div className="p-3 bg-muted rounded">
+                          <p className="text-xs text-muted-foreground">Unique Users</p>
+                          <p className="text-lg font-bold">{stat.ai_usage.unique_users}</p>
+                        </div>
+                        <div className="p-3 bg-muted rounded">
+                          <p className="text-xs text-muted-foreground">Tokens Used</p>
+                          <p className="text-lg font-bold">{stat.ai_usage.total_tokens}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </DashboardCard>
               ))}
             </>
@@ -198,53 +210,40 @@ export default function AnalyticsPage() {
             <>
               {/* Student Overview Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <DashboardCard>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Quizzes Completed</p>
-                      <p className="text-3xl font-bold mt-2">{progressData.completed_quizzes}</p>
-                    </div>
-                    <CheckCircle className="size-8 text-primary/50" />
-                  </div>
+                <DashboardCard
+                  title={<span className="text-sm text-muted-foreground">Quizzes Completed</span>}
+                  action={<CheckCircle className="size-8 text-primary/50" />}
+                >
+                  <p className="text-3xl font-bold">{progressData.completed_quizzes}</p>
                 </DashboardCard>
 
-                <DashboardCard>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Average Score</p>
-                      <p className="text-3xl font-bold mt-2">{progressData.average_score.toFixed(1)}%</p>
-                    </div>
-                    <TrendingUp className="size-8 text-primary/50" />
-                  </div>
+                <DashboardCard
+                  title={<span className="text-sm text-muted-foreground">Average Score</span>}
+                  action={<TrendingUp className="size-8 text-primary/50" />}
+                >
+                  <p className="text-3xl font-bold">{progressData.average_score.toFixed(1)}%</p>
                 </DashboardCard>
 
-                <DashboardCard>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Best Score</p>
-                      <p className="text-3xl font-bold mt-2">{progressData.best_score}%</p>
-                    </div>
-                    <TrendingUp className="size-8 text-primary/50" />
-                  </div>
+                <DashboardCard
+                  title={<span className="text-sm text-muted-foreground">Best Score</span>}
+                  action={<TrendingUp className="size-8 text-primary/50" />}
+                >
+                  <p className="text-3xl font-bold">{progressData.best_score}%</p>
                 </DashboardCard>
 
-                <DashboardCard>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Learning Mode</p>
-                      <p className="text-sm font-semibold mt-2">
-                        {progressData.quizzes[0]?.learning_mode || "Normal"}
-                      </p>
-                    </div>
-                    <Zap className="size-8 text-primary/50" />
-                  </div>
+                <DashboardCard
+                  title={<span className="text-sm text-muted-foreground">Learning Mode</span>}
+                  action={<Zap className="size-8 text-primary/50" />}
+                >
+                  <p className="text-sm font-semibold">
+                    {progressData.quizzes[0]?.learning_mode || "Normal"}
+                  </p>
                 </DashboardCard>
               </div>
 
               {/* Student Quiz History */}
               {progressData.quizzes.length > 0 && (
-                <DashboardCard>
-                  <h3 className="font-semibold mb-4">Quiz History</h3>
+                <DashboardCard title="Quiz History">
                   <div className="space-y-3">
                     {progressData.quizzes.map((attempt, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 rounded bg-muted/50">
