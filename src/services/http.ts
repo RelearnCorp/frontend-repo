@@ -4,7 +4,7 @@ import type { ApiEnvelope, ApiUser } from "@/types/api";
  * Backend lives in a separate Next.js app (RelearnCorp/Backend-repository).
  * Point NEXT_PUBLIC_API_URL at its origin (default assumes `PORT=3001`).
  */
-const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL ?? "";
 const API_BASE = `${API_ORIGIN.replace(/\/$/, "")}/api`;
 
 const STORAGE_KEYS = {
