@@ -18,7 +18,7 @@ export const sendChatMessage = async (
 ): Promise<ChatResponse> => {
   const token = localStorage.getItem('access_token');
   
-  const response = await fetch('http://localhost:3000/api/ai/chat', {
+  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/ai/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export const fetchHint = async (
 ) => {
   const token = localStorage.getItem('access_token');
 
-  const response = await fetch('http://localhost:3000/api/ai/hint', {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai/hint`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
